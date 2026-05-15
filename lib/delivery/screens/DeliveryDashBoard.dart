@@ -2159,6 +2159,24 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
               DriverStepProgress(
                 currentIndex: _progressIndexForStatus(itemStatus),
                 labels: _stageProgressLabels,
+                icons: const [
+                  Icons.search_outlined,
+                  Icons.assignment_ind_outlined,
+                  Icons.check_circle_outline,
+                  Icons.place_outlined,
+                  Icons.inventory_2_outlined,
+                  Icons.local_shipping_outlined,
+                  Icons.task_alt_outlined,
+                ],
+                statusColors: const [
+                  Color(0xFFF59E0B),
+                  Color(0xFF8B5CF6),
+                  Color(0xFF2563EB),
+                  Color(0xFF0EA5E9),
+                  Color(0xFF06B6D4),
+                  Color(0xFF4F46E5),
+                  Color(0xFF10B981),
+                ],
               ),
               const SizedBox(height: 10),
               _locationDetailTile(

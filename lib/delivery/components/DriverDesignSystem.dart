@@ -429,48 +429,98 @@ class DriverOnlineToggle extends StatelessWidget {
 class DriverStepProgress extends StatelessWidget {
   final int currentIndex;
   final List<String> labels;
+  final List<IconData>? icons;
+  final List<Color>? statusColors;
 
   const DriverStepProgress({
     super.key,
     required this.currentIndex,
     required this.labels,
+    this.icons,
+    this.statusColors,
   });
 
   @override
   Widget build(BuildContext context) {
     if (labels.isEmpty) return const SizedBox();
     final int safeIndex = currentIndex.clamp(0, labels.length - 1).toInt();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: List.generate(labels.length, (index) {
-            final bool isActive = index <= safeIndex;
-            return Expanded(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                height: 5,
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? DriverPalette.primary
-                      : const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(999),
-                ),
+    
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(labels.length, (index) {
+          final bool isCompleted = safeIndex >= index;
+          final bool isCurrent = safeIndex == index;
+          final Color stepColor = statusColors != null && index < statusColors!.length
+              ? statusColors![index]
+              : DriverPalette.primary;
+          final IconData? stepIcon = icons != null && index < icons!.length
+              ? icons![index]
+              : null;
+          
+          return Row(
+            children: [
+              Column(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: isCompleted
+                          ? stepColor.withValues(alpha: isCurrent ? 0.22 : 0.15)
+                          : const Color(0xFFF1F5F9),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isCompleted ? stepColor : const Color(0xFFCBD5E1),
+                        width: 2,
+                      ),
+                    ),
+                    child: stepIcon != null
+                        ? Icon(stepIcon, size: 18, color: isCompleted ? stepColor : const Color(0xFF94A3B8))
+                        : Center(
+                            child: Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: isCompleted ? stepColor : const Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 70,
+                    child: Text(
+                      labels[index],
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                        color: isCompleted ? stepColor : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            );
-          }),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Step ${safeIndex + 1} of ${labels.length} • ${labels[safeIndex]}',
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF475569),
-          ),
-        ),
-      ],
+              if (index != labels.length - 1)
+                Container(
+                  width: 24,
+                  height: 2,
+                  margin: const EdgeInsets.only(bottom: 28),
+                  color: isCompleted && index < safeIndex
+                      ? (statusColors != null && index + 1 < statusColors!.length
+                          ? statusColors![index + 1]
+                          : DriverPalette.primary)
+                      : const Color(0xFFCBD5E1),
+                ),
+            ],
+          );
+        }),
+      ),
     );
   }
 }
