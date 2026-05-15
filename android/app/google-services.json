@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "974587081017",
+    "firebase_url": "https://nadaruns-369cc-default-rtdb.firebaseio.com",
+    "project_id": "nadaruns-369cc",
+    "storage_bucket": "nadaruns-369cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974587081017:android:9befcc811f915292fc38e8",
+        "android_client_info": {
+          "package_name": "com.nadaruns.delivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974587081017-9g0pbqp6589o9su0n8u35d573qbgma6o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nadaruns.delivery",
+            "certificate_hash": "5f4d196035c6c2a49fb1143efd6273eddf128070"
+          }
+        },
+        {
+          "client_id": "974587081017-nnk88509ebqr837ut2e94fu1fq048buu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4rQYgL_7OXlGbBEYStgcq9WI8kX05cNs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974587081017-nnk88509ebqr837ut2e94fu1fq048buu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

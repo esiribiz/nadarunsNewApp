@@ -1,0 +1,49 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://google.bintray.com/exoplayer/'
+        }
+        maven {
+            url "https://artifactory.paytm.in/libs-release-local"
+        }
+        configurations.all {
+            resolutionStrategy {
+                force "com.google.android.gms:play-services-location:21.0.1"
+            }
+        }
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (namespace == null) {
+                    namespace project.group
+                }
+            }
+        }
+    }
+}
+subprojects {
+    tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
+        options.warnings = false
+        options.deprecation = false
+        options.compilerArgs.addAll(['-Xlint:none', '-Xlint:-options', '-Xlint:-unchecked', '-Xlint:-deprecation', '-nowarn'])
+    }
+}
+
+
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
