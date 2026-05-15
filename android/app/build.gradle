@@ -31,8 +31,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = '17'
-        // Disable incremental compilation to avoid Kotlin compiler bugs
-        incremental = false
     }
 
     sourceSets {
