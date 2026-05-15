@@ -1,6 +1,6 @@
-# mighty_local_delivery
+# Nadaruns Delivery
 
-mighty_local_delivery
+nadaruns_delivery
 
 ## Getting started
 
@@ -22,7 +22,7 @@ git push -uf origin main
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab.com/mobile-app23/on-demand-local-delivery-system/mighty_local_delivery/-/settings/integrations)
+- [ ] [Set up project integrations](https://gitlab.com/mobile-app23/logistics-delivery-system/nadaruns_delivery/-/settings/integrations)
 
 ## Collaborate with your team
 
