@@ -283,12 +283,24 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
                         ),
                         14.height,
                         DriverStepProgress(
-                          currentIndex: isDeparted ? 3 : 2,
+                          currentIndex: isDeparted ? 3 : (isPickedUp ? 2 : 1),
                           labels: const [
                             'Request',
                             'Pickup',
                             'Transit',
                             'Delivered',
+                          ],
+                          icons: const [
+                            Icons.post_add_outlined,
+                            Icons.inventory_2_outlined,
+                            Icons.local_shipping_outlined,
+                            Icons.task_alt_outlined,
+                          ],
+                          statusColors: const [
+                            Color(0xFFF59E0B),
+                            Color(0xFF2563EB),
+                            Color(0xFF06B6D4),
+                            Color(0xFF10B981),
                           ],
                         ),
                         if (widget.isShowPayment.validate()) ...[
@@ -413,7 +425,7 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
                                 ),
                               ),
                               onPressed: () async {
-                                signaturePicUPPadKey.currentState!.clear();
+                                try { signaturePicUPPadKey.currentState?.clear(); } catch (e) { log('Error clearing signature: $e'); }
                               },
                             ),
                           ),
@@ -461,7 +473,7 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
                                 ),
                               ),
                               onPressed: () async {
-                                signatureDeliveryPadKey.currentState!.clear();
+                                try { signatureDeliveryPadKey.currentState?.clear(); } catch (e) { log('Error clearing delivery signature: $e'); }
                               },
                             ),
                           ).visible(
@@ -680,17 +692,30 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
       }
     }
 
+    // Capture signatures based on current status
     if (widget.orderData!.status == ORDER_ACCEPTED ||
         widget.orderData!.status == ORDER_ARRIVED) {
       if (imageSignature == null) {
-        imageSignature = await saveSignature(pickupScreenshotController);
-        log(imageSignature!.path);
+        try {
+          imageSignature = await saveSignature(pickupScreenshotController);
+          log(imageSignature!.path);
+        } catch (e) {
+          toast('Failed to capture pickup signature');
+          log(e);
+          return;
+        }
       }
     }
     if (widget.orderData!.status == ORDER_DEPARTED) {
       if (deliverySignature == null) {
-        deliverySignature = await saveSignature(deliveryScreenshotController);
-        log(deliverySignature!.path);
+        try {
+          deliverySignature = await saveSignature(deliveryScreenshotController);
+          log(deliverySignature!.path);
+        } catch (e) {
+          toast('Failed to capture delivery signature');
+          log(e);
+          return;
+        }
       }
     }
 
@@ -747,7 +772,7 @@ class ReceivedScreenOrderScreenState extends State<ReceivedScreenOrderScreen> {
               await saveDelivery()
                   .then((value) async {
                     appStore.setLoading(false);
-                    // finish(context, true);
+                    finish(context, true);
                   })
                   .catchError((error) {
                     appStore.setLoading(false);
