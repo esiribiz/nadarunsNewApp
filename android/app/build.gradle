@@ -31,6 +31,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = '17'
+        // Disable incremental compilation to avoid Kotlin compiler bugs
+        incremental = false
     }
 
     sourceSets {
@@ -53,6 +55,10 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+            // Disable Kotlin incremental compilation to avoid compiler bugs
+            kotlinOptions {
+                freeCompilerArgs += ['-Xno-call-assertions', '-Xno-param-assertions']
+            }
         }
     }
 
@@ -73,7 +79,7 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.20"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.10"
     implementation platform('com.google.firebase:firebase-bom:32.7.2')
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.browser:browser:1.3.0'
