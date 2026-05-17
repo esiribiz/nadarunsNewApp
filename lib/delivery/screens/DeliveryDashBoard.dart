@@ -1267,7 +1267,20 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
         .then((value) {
           appStore.setLoading(false);
           toast(value.message);
-          getOrderListApiCall();
+          // Clear active order lock when cancelling so the order returns to available jobs
+          if (_activeOrderId == order.id) {
+            _activeOrderId = null;
+            _activeOrderStatus = null;
+          }
+          // Refresh orders and switch to Available Jobs tab to show the cancelled order
+          selectedStatusIndex = 0; // ORDER_PENDING tab
+          currentPage = 1;
+          orderData.clear();
+          if (pageController.hasClients) {
+            pageController.jumpToPage(0);
+          }
+          getOrderListApiCall(showLoader: false);
+          setState(() {});
         })
         .catchError((error) {
           appStore.setLoading(false);
