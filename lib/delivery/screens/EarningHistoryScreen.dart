@@ -74,12 +74,17 @@ class EarningHistoryScreenState extends State<EarningHistoryScreen> {
           }
           final List<EarningData> fetched = value.data ?? [];
           for (final item in fetched) {
+            // Skip items with null or zero orderId
+            if (item.orderId == null || item.orderId == 0) {
+              continue;
+            }
+            // Skip items with null or zero deliveryManCommission (empty earnings)
+            if (item.deliveryManCommission == null || item.deliveryManCommission == 0) {
+              continue;
+            }
+            // Check for duplicates based on orderId only (most reliable identifier)
             final bool alreadyAdded = earningList.any(
-              (existing) =>
-                  (existing.id != null && existing.id == item.id) ||
-                  (existing.id == null &&
-                      existing.orderId == item.orderId &&
-                      existing.createdAt == item.createdAt),
+              (existing) => existing.orderId == item.orderId,
             );
             if (!alreadyAdded) {
               earningList.add(item);
