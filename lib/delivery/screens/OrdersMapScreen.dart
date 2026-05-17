@@ -501,6 +501,10 @@ class _OrdersMapScreenState extends State<OrdersMapScreen> {
           deliveryManId == 0 ||
           deliveryManId == getIntAsync(USER_ID);
     }
+    // Cancelled orders should return to available jobs if cancelled by this driver
+    if (status == ORDER_CANCELLED) {
+      return !isOrderCancelledForCurrentDriver(element);
+    }
     return false;
   }
 
