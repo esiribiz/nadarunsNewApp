@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../main/utils/Constants.dart';
 
@@ -426,7 +427,7 @@ class DriverOnlineToggle extends StatelessWidget {
   }
 }
 
-class DriverStepProgress extends StatelessWidget {
+class DriverStepProgress extends StatefulWidget {
   final int currentIndex;
   final List<String> labels;
   final List<IconData>? icons;
@@ -441,85 +442,201 @@ class DriverStepProgress extends StatelessWidget {
   });
 
   @override
+  State<DriverStepProgress> createState() => _DriverStepProgressState();
+}
+
+class _DriverStepProgressState extends State<DriverStepProgress>
+    with TickerProviderStateMixin {
+  late AnimationController _progressController;
+  late Animation<double> _connectorAnimation;
+  int _previousIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousIndex = widget.currentIndex - 1;
+    _progressController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _connectorAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
+    );
+    _progressController.forward();
+  }
+
+  @override
+  void didUpdateWidget(DriverStepProgress oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _previousIndex = oldWidget.currentIndex;
+      _progressController.reset();
+      _progressController.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _progressController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (labels.isEmpty) return const SizedBox();
-    final int safeIndex = currentIndex.clamp(0, labels.length - 1).toInt();
-    
+    if (widget.labels.isEmpty) return const SizedBox();
+    final int safeIndex = widget.currentIndex.clamp(0, widget.labels.length - 1).toInt();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List.generate(labels.length, (index) {
-          final bool isCompleted = safeIndex >= index;
-          final bool isCurrent = safeIndex == index;
-          final Color stepColor = statusColors != null && index < statusColors!.length
-              ? statusColors![index]
-              : DriverPalette.primary;
-          final IconData? stepIcon = icons != null && index < icons!.length
-              ? icons![index]
-              : null;
-          
-          return Row(
-            children: [
-              Column(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: isCompleted
-                          ? stepColor.withValues(alpha: isCurrent ? 0.22 : 0.15)
-                          : const Color(0xFFF1F5F9),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isCompleted ? stepColor : const Color(0xFFCBD5E1),
-                        width: 2,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        child: Row(
+          children: List.generate(widget.labels.length, (index) {
+            final bool isCompleted = safeIndex >= index;
+            final bool isCurrent = safeIndex == index;
+            final Color stepColor = widget.statusColors != null &&
+                    index < widget.statusColors!.length
+                ? widget.statusColors![index]
+                : DriverPalette.primary;
+            final IconData? stepIcon = widget.icons != null &&
+                    index < widget.icons!.length
+                ? widget.icons![index]
+                : null;
+
+            return Row(
+              children: [
+                Column(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOutBack,
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? stepColor.withValues(alpha: isCurrent ? 0.22 : 0.15)
+                            : const Color(0xFFF1F5F9),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isCompleted ? stepColor : const Color(0xFFCBD5E1),
+                          width: isCurrent ? 3 : 2,
+                        ),
+                        boxShadow: isCurrent
+                            ? [
+                                BoxShadow(
+                                  color: stepColor.withValues(alpha: 0.4),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Center(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) {
+                            return ScaleTransition(scale: animation, child: child);
+                          },
+                          child: isCompleted && !isCurrent
+                              ? Icon(
+                                  Icons.check,
+                                  key: ValueKey('check_$index'),
+                                  size: 22,
+                                  color: stepColor,
+                                )
+                              : stepIcon != null
+                                  ? Icon(
+                                      stepIcon,
+                                      key: ValueKey('icon_$index'),
+                                      size: 20,
+                                      color: isCompleted ? stepColor : const Color(0xFF94A3B8),
+                                    )
+                                  : Text(
+                                      '${index + 1}',
+                                      key: ValueKey('num_$index'),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: isCompleted
+                                            ? stepColor
+                                            : const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                        ),
                       ),
                     ),
-                    child: stepIcon != null
-                        ? Icon(stepIcon, size: 18, color: isCompleted ? stepColor : const Color(0xFF94A3B8))
-                        : Center(
-                            child: Text(
-                              '${index + 1}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: isCompleted ? stepColor : const Color(0xFF94A3B8),
-                              ),
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: 70,
-                    child: Text(
-                      labels[index],
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
-                        color: isCompleted ? stepColor : const Color(0xFF64748B),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: 76,
+                      child: Text(
+                        widget.labels[index],
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                          color: isCompleted ? stepColor : const Color(0xFF64748B),
+                          height: 1.2,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              if (index != labels.length - 1)
-                Container(
-                  width: 24,
-                  height: 2,
-                  margin: const EdgeInsets.only(bottom: 28),
-                  color: isCompleted && index < safeIndex
-                      ? (statusColors != null && index + 1 < statusColors!.length
-                          ? statusColors![index + 1]
-                          : DriverPalette.primary)
-                      : const Color(0xFFCBD5E1),
+                  ],
                 ),
-            ],
-          );
-        }),
+                if (index != widget.labels.length - 1)
+                  Container(
+                    width: 32,
+                    height: 3,
+                    margin: const EdgeInsets.only(bottom: 32),
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        AnimatedBuilder(
+                          animation: _connectorAnimation,
+                          builder: (context, child) {
+                            final double progress = index < safeIndex
+                                ? 1.0
+                                : (index == safeIndex - 1 && _previousIndex < safeIndex)
+                                    ? _connectorAnimation.value
+                                    : 0.0;
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: Container(
+                                width: 32 * progress,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      widget.statusColors != null &&
+                                              index + 1 < widget.statusColors!.length
+                                          ? widget.statusColors![index + 1]
+                                          : DriverPalette.primary,
+                                      widget.statusColors != null &&
+                                              index + 1 < widget.statusColors!.length
+                                          ? widget.statusColors![index + 1].withValues(alpha: 0.7)
+                                          : DriverPalette.primary.withValues(alpha: 0.7),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }

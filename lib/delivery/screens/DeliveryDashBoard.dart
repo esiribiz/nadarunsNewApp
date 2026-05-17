@@ -1649,6 +1649,8 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
       case ORDER_DELIVERED:
       case ORDER_SHIPPED:
         return 6;
+      case ORDER_CANCELLED:
+        return -1; // Cancelled orders don't show progress
       default:
         return 0;
     }
