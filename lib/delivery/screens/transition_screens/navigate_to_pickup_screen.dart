@@ -15,13 +15,15 @@ import '../components/DriverDesignSystem.dart';
 /// - Contact customer button
 /// - Cancel order option
 class NavigateToPickupScreen extends StatefulWidget {
-  final OrderData? orderData;
+  final OrderData? order;
+  final VoidCallback? onStartNavigation;
   final VoidCallback? onArrivedAtPickup;
   final VoidCallback? onCancelOrder;
 
   const NavigateToPickupScreen({
     super.key,
-    this.orderData,
+    this.order,
+    this.onStartNavigation,
     this.onArrivedAtPickup,
     this.onCancelOrder,
   });
@@ -64,9 +66,9 @@ class _NavigateToPickupScreenState extends State<NavigateToPickupScreen>
   }
 
   void _loadRouteData() {
-    if (widget.orderData == null) return;
+    if (widget.order == null) return;
 
-    final order = widget.orderData!;
+    final order = widget.order!;
 
     // Driver location marker (current position)
     if (order.latitude != null && order.longitude != null) {
@@ -113,9 +115,9 @@ class _NavigateToPickupScreenState extends State<NavigateToPickupScreen>
   }
 
   void _centerMapOnRoute() {
-    if (widget.orderData == null || _mapController == null) return;
+    if (widget.order == null || _mapController == null) return;
 
-    final order = widget.orderData!;
+    final order = widget.order!;
     if (order.latitude != null && order.fromLatitude != null) {
       final lat1 = order.latitude!;
       final lat2 = order.fromLatitude!;
@@ -165,7 +167,7 @@ class _NavigateToPickupScreenState extends State<NavigateToPickupScreen>
 
   @override
   Widget build(BuildContext context) {
-    final order = widget.orderData;
+    final order = widget.order;
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(

@@ -18,7 +18,7 @@ import '../components/DriverDesignSystem.dart';
 /// - Countdown timer for decision
 /// - Customer rating, distance, earnings, ETA
 class AcceptOrderScreen extends StatefulWidget {
-  final OrderData? orderData;
+  final OrderData? order;
   final Function(bool accepted)? onDecision;
   final int decisionTimeoutSeconds;
 
@@ -106,9 +106,9 @@ class _AcceptOrderScreenState extends State<AcceptOrderScreen>
   }
 
   void _loadOrderMarkers() {
-    if (widget.orderData == null) return;
+    if (widget.order == null) return;
 
-    final order = widget.orderData!;
+    final order = widget.order!;
     
     // Pickup marker
     if (order.fromLatitude != null && order.fromLongitude != null) {
@@ -158,9 +158,9 @@ class _AcceptOrderScreenState extends State<AcceptOrderScreen>
   }
 
   void _centerMapOnRoute() {
-    if (widget.orderData == null || _mapController == null) return;
+    if (widget.order == null || _mapController == null) return;
 
-    final order = widget.orderData!;
+    final order = widget.order!;
     if (order.fromLatitude != null && order.toLatitude != null) {
       final lat1 = order.fromLatitude!;
       final lat2 = order.toLatitude!;
@@ -219,7 +219,7 @@ class _AcceptOrderScreenState extends State<AcceptOrderScreen>
 
   @override
   Widget build(BuildContext context) {
-    final order = widget.orderData;
+    final order = widget.order;
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
