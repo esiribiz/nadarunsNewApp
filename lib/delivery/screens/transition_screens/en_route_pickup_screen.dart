@@ -130,7 +130,7 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
         ],
         color: DriverPalette.routeLineActive,
         width: 6,
-        patterns: const [PatternItem.dash(20), PatternItem.gap(10)],
+        patterns: [PatternItem.dash(20), PatternItem.gap(10)],
       ));
     }
 

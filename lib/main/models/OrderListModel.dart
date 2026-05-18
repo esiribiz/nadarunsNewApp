@@ -168,6 +168,10 @@ class OrderData {
   var get distance => totalDistance;
   String? get estimatedDeliveryTime => deliveryDatetime;
   num? get customerRating => ratingDetail?.rating;
+  
+  // Additional computed properties for driver location compatibility
+  String? get latitude => pickupPoint?.latitude;
+  String? get longitude => pickupPoint?.longitude;
 
   OrderData({
     this.orderTrackingId,
