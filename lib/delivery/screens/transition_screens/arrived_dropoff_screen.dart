@@ -6,7 +6,7 @@ import '../../../main/models/OrderListModel.dart';
 import '../../../main/network/RestApis.dart';
 import '../../../main/utils/Constants.dart';
 import '../../../main.dart';
-import '../components/DriverDesignSystem.dart';
+import '../../components/DriverDesignSystem.dart';
 import 'earnings_summary_screen.dart';
 
 /// Screen 6: Arrived at Dropoff
