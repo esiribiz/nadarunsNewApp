@@ -1540,8 +1540,8 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
                             color: Colors.white,
                           ),
                         ),
-                      ).visible(appStore.allUnreadCount != 0);
-                    },
+                      ),
+                    ).visible(appStore.allUnreadCount != 0);
                   },
                 ),
               ],
