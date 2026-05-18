@@ -1302,43 +1302,188 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffoldComponent(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: commonAppBarWidget(
-          '${language.hey} ${getStringAsync(NAME)} 👋',
-          showBack: false,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: DriverOnlineToggle(
-                isOnline: isDriverOnline,
-                onChanged: onOnlineStatusChanged,
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Full-screen map background
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFF8FAFC), Color(0xFFEFF6FF)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
+              child: _buildMapBackground(),
             ),
-            Container(
-              margin: .symmetric(vertical: 12, horizontal: 4),
-              padding: .symmetric(horizontal: 8, vertical: 4),
-              decoration: boxDecorationWithRoundedCorners(
-                borderRadius: radius(defaultRadius),
-                backgroundColor: Colors.white24,
+          ),
+          
+          // Dark top navigation header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildDarkHeader(),
+          ),
+          
+          // Floating bottom sheet with order details
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildFloatingBottomSheet(),
+          ),
+          
+          // Map view button (floating)
+          Positioned(
+            left: 16,
+            bottom: MediaQuery.of(context).size.height * 0.55,
+            child: _buildFloatingMapButton(),
+          ),
+          
+          // Ongoing job button (floating)
+          Positioned(
+            right: 16,
+            bottom: MediaQuery.of(context).size.height * 0.55,
+            child: _buildFloatingOngoingButton(),
+          ),
+        ],
+      ),
+      floatingActionButton: (_canOpenCrispChat)
+          ? FloatingActionButton(
+              onPressed: () async {
+                await openCrispSupportChat();
+              },
+              backgroundColor: DriverPalette.primary,
+              elevation: 4,
+              child: CachedNetworkImage(
+                imageUrl: crispChatIcon ?? "",
+                errorWidget: (context, url, error) =>
+                    const Icon(Icons.chat_bubble_outline, color: Colors.white),
               ),
-              child:
-                  Row(
-                    children: [
-                      Icon(
-                        Ionicons.ios_location_outline,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      6.width,
-                      Text(
-                        CityModel.fromJson(
-                          getJSONAsync(CITY_DATA),
-                        ).name.validate(),
-                        style: primaryTextStyle(color: white, size: 12),
-                      ),
-                    ],
+            )
+          : null,
+    );
+  }
+
+  Widget _buildMapBackground() {
+    return GestureDetector(
+      onPanStart: (_) => _isOpeningOngoingOrder = false,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_visibleOrdersForCurrentTab().isEmpty && !appStore.isLoading)
+              _buildEmptyStateOnMap(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyStateOnMap() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.local_shipping_outlined,
+            size: 48,
+            color: DriverPalette.primary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'No orders available',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: DriverPalette.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'New delivery requests will appear here',
+          style: TextStyle(
+            fontSize: 14,
+            color: DriverPalette.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDarkHeader() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF0A0E1A),
+      ),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        bottom: 12,
+        left: 16,
+        right: 16,
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${language.hey} ${getStringAsync(NAME)} 👋',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.white70,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          CityModel.fromJson(
+                            getJSONAsync(CITY_DATA),
+                          ).name.validate(),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ).onTap(
                     () {
                       UserCitySelectScreen(
@@ -1350,193 +1495,490 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
                         },
                       ).launch(context);
                     },
-                    highlightColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    splashColor: Colors.transparent,
                   ),
+                ],
+              ),
             ),
+            DriverOnlineToggle(
+              isOnline: isDriverOnline,
+              onChanged: onOnlineStatusChanged,
+            ),
+            const SizedBox(width: 12),
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Icon(
-                    Ionicons.md_notifications_outline,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_none,
                     color: Colors.white,
+                    size: 22,
                   ),
                 ),
                 Observer(
                   builder: (context) {
                     return Positioned(
-                      right: 0,
-                      top: 2,
+                      right: 4,
+                      top: 4,
                       child: Container(
-                        height: 20,
-                        width: 20,
+                        height: 18,
+                        width: 18,
                         alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
+                        decoration: const BoxDecoration(
+                          color: DriverPalette.warning,
                           shape: BoxShape.circle,
                         ),
                         child: Text(
                           '${appStore.allUnreadCount < 99 ? appStore.allUnreadCount : '99+'}',
-                          style: primaryTextStyle(
-                            size: appStore.allUnreadCount < 99 ? 12 : 8,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
-                      ),
-                    ).visible(appStore.allUnreadCount != 0);
+                      ).visible(appStore.allUnreadCount != 0);
+                    },
                   },
                 ),
               ],
-            ).withWidth(30).onTap(() {
+            ).onTap(() {
               NotificationScreen().launch(context);
             }),
-            IconButton(
-              onPressed: () async {
-                DHomeFragment().launch(
-                  context,
-                  pageRouteAnimation: PageRouteAnimation.Fade,
-                  isNewTask: true,
-                );
-              },
-              icon: Icon(Ionicons.stats_chart_outline, color: Colors.white),
-            ),
-            IconButton(
-              padding: .only(right: 8),
-              onPressed: () async {
-                DProfileFragment().launch(
-                  context,
-                  pageRouteAnimation: PageRouteAnimation.Fade,
-                );
-              },
-              icon: Icon(Ionicons.settings_outline, color: Colors.white),
-            ),
           ],
         ),
       ),
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFF8FAFC), Color(0xFFEFF6FF)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+    );
+  }
+
+  Widget _buildFloatingBottomSheet() {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.45,
+      minChildSize: 0.35,
+      maxChildSize: 0.85,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x1F000000),
+                blurRadius: 32,
+                offset: Offset(0, -8),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: DriverPalette.borderMedium,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
+              // Status flow tabs
+              _buildModernStatusTabs(),
+              
+              // Trip route filter
+              if (_isAvailableJobsTabSelected) _buildModernRouteFilter(),
+              
+              // Orders list
+              Expanded(
+                child: _buildModernOrdersList(scrollController),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildModernStatusTabs() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: List.generate(statusList.length, (index) {
+            final String status = statusList[index];
+            final bool isSelected = index == selectedStatusIndex;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: () => _switchStatusTab(index),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? DriverPalette.surface
+                        : DriverPalette.primaryLight,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : DriverPalette.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _statusFlowLabel(status),
+                        style: TextStyle(
+                          color: isSelected
+                              ? Colors.white
+                              : DriverPalette.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernRouteFilter() {
+    if (!_hasTripRouteFilter) {
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: DriverPalette.primaryLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: DriverPalette.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: DriverPalette.primary,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.alt_route,
+                color: Colors.white,
+                size: 20,
               ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Set your route',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: DriverPalette.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Match jobs to your preferred route',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: DriverPalette.primary.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: _openTripRouteFilterDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: DriverPalette.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text('Set'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: DriverPalette.earningsBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: DriverPalette.success.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: DriverPalette.success,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.check_circle,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildStatusFlowStrip(),
-                _buildTripRouteFilterBar(),
+                const Text(
+                  'Route active',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: DriverPalette.success,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${_tripRouteOriginLabel.validate()} → ${_tripRouteDestinationLabel.validate()}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: DriverPalette.success.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: _clearTripRouteFilter,
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFFEE2E2),
+              foregroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            icon: const Icon(Icons.close, size: 18),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernOrdersList(ScrollController scrollController) {
+    final List<OrderData> visibleOrders = _visibleOrdersForCurrentTab();
+    
+    if (appStore.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    if (visibleOrders.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: DriverPalette.textTertiary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No orders in this status',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: DriverPalette.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      controller: scrollController,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      itemCount: visibleOrders.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        return _buildModernOrderCard(visibleOrders[index]);
+      },
+    );
+  }
+
+  Widget _buildModernOrderCard(OrderData data) {
+    final String itemStatus = data.status.validate();
+    final Color stageColor = driverStatusColor(itemStatus);
+    final bool showMainAction = _shouldShowMainActionForStatus(itemStatus);
+    final String primaryActionText = buttonText(itemStatus);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: DriverPalette.borderLight,
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: DriverPalette.shadowLight,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header with gradient
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  stageColor.withValues(alpha: 0.15),
+                  stageColor.withValues(alpha: 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: stageColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    _serviceLabel(data),
+                    style: TextStyle(
+                      color: stageColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: Stack(
+                  child: Text(
+                    'Order ${_orderRef(data)}',
+                    style: TextStyle(
+                      color: DriverPalette.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                DriverStatusChip(
+                  label: orderStatus(itemStatus),
+                  color: stageColor,
+                ),
+              ],
+            ),
+          ),
+
+          // Customer info
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: DriverPalette.primaryLight,
+                  child: Icon(
+                    Icons.person,
+                    color: DriverPalette.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      PageView(
-                        controller: pageController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        onPageChanged: (value) {
-                          selectedStatusIndex = value;
-                          currentPage = 1;
-                          orderData.clear();
-                          if (_isProgrammaticStatusTransition) {
-                            _isProgrammaticStatusTransition = false;
-                            setState(() {});
-                            return;
-                          }
-                          getOrderListApiCall(showLoader: true);
-                          setState(() {});
-                        },
-                        children: statusList.map((e) {
-                          final List<OrderData> visibleOrders =
-                              _visibleOrdersForCurrentTab();
-                          return Stack(
-                            children: [
-                              AnimatedListView(
-                                itemCount: visibleOrders.length,
-                                shrinkWrap: true,
-                                physics: BouncingScrollPhysics(),
-                                listAnimationType: ListAnimationType.Slide,
-                                padding: .only(
-                                  left: 16,
-                                  right: 16,
-                                  top: 14,
-                                  bottom: 70,
-                                ),
-                                flipConfiguration: FlipConfiguration(
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.fastOutSlowIn,
-                                ),
-                                fadeInConfiguration: FadeInConfiguration(
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.fastOutSlowIn,
-                                ),
-                                onNextPage: () {
-                                  if (currentPage < totalPage) {
-                                    currentPage++;
-                                    setState(() {});
-                                    getOrderListApiCall();
-                                  }
-                                },
-                                onSwipeRefresh: () async {
-                                  currentPage = 1;
-                                  try {
-                                    final value = await getAppSetting();
-                                    appStore.setOtpVerifyOnPickupDelivery(
-                                      value.otpVerifyOnPickupDelivery == 1,
-                                    );
-                                    appStore.setCurrencyCode(
-                                      value.currencyCode ?? CURRENCY_CODE,
-                                    );
-                                    appStore.setCurrencySymbol(
-                                      value.currency ?? CURRENCY_SYMBOL,
-                                    );
-                                    appStore.setCurrencyPosition(
-                                      value.currencyPosition ??
-                                          CURRENCY_POSITION_LEFT,
-                                    );
-                                    appStore.isVehicleOrder =
-                                        value.isVehicleInOrder ?? 0;
-                                    appStore.setSiteEmail(
-                                      value.siteEmail ?? "",
-                                    );
-                                    appStore.setCopyRight(
-                                      value.siteCopyright ?? "",
-                                    );
-                                    appStore.setIsInsuranceAllowed(
-                                      value.isInsuranceAllowed ?? "0",
-                                    );
-                                    appStore.setInsurancePercentage(
-                                      value.insurancePercentage ?? "0",
-                                    );
-                                    appStore.setInsuranceDescription(
-                                      value.insuranceDescription ?? "",
-                                    );
-                                    appStore.setMaxAmountPerMonth(
-                                      value.maxEarningsPerMonth ?? '',
-                                    );
-                                    appStore.setClaimDuration(
-                                      value.claimDuration ?? '',
-                                    );
-                                  } catch (error) {
-                                    log(error.toString());
-                                  }
-                                  getOrderListApiCall(showLoader: true);
-                                  return Future.value(true);
-                                },
-                                itemBuilder: (context, i) {
-                                  OrderData item = visibleOrders[i];
-                                  return orderCard(item);
-                                },
-                              ).visible(visibleOrders.isNotEmpty),
-                              loaderWidget().visible(appStore.isLoading),
-                              emptyWidget().visible(
-                                visibleOrders.isEmpty && !appStore.isLoading,
-                              ),
-                            ],
-                          );
-                        }).toList(),
+                      Text(
+                        data.clientName.validate().isNotEmpty
+                            ? data.clientName.validate()
+                            : 'Customer',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: Color(0xFFFBBF24),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _ratingLabel(data),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1544,80 +1986,342 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
               ],
             ),
           ),
-          Positioned(
-            left: 14,
-            bottom: 14,
-            child: SizedBox(
-              height: 48,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: DriverPalette.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
+
+          // Route visualization
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            height: 60,
+            decoration: BoxDecoration(
+              color: DriverPalette.divider,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Stack(
+              children: [
+                CustomPaint(
+                  painter: _MiniRoutePainter(routeColor: stageColor),
+                  size: const Size(double.infinity, 60),
+                ),
+                Positioned(
+                  left: 12,
+                  top: 12,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: DriverPalette.mapPinOrigin,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
                   ),
                 ),
-                onPressed: _openMapView,
-                icon: const Icon(Icons.map_outlined, size: 18),
-                label: Text(
-                  'Map View',
-                  style: boldTextStyle(color: Colors.white, size: 14),
+                Positioned(
+                  right: 12,
+                  bottom: 12,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: DriverPalette.mapPinDestination,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-          Positioned(
-            right: 14,
-            bottom: _canOpenCrispChat ? 86 : 14,
-            child: SizedBox(
-              height: 48,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F766E),
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF94A3B8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
-                  ),
+
+          // Location details
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Column(
+              children: [
+                _buildLocationRow(
+                  label: 'Pickup',
+                  address: data.pickupPoint?.address.validate() ?? '-',
+                  iconColor: DriverPalette.mapPinOrigin,
                 ),
-                onPressed: _isOpeningOngoingOrder
-                    ? null
-                    : _openOngoingDeliveryJob,
-                icon: _isOpeningOngoingOrder
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                const SizedBox(height: 8),
+                _buildLocationRow(
+                  label: 'Drop-off',
+                  address: data.deliveryPoint?.address.validate() ?? '-',
+                  iconColor: DriverPalette.mapPinDestination,
+                ),
+              ],
+            ),
+          ),
+
+          // Metrics
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                _buildMetricChip(
+                  icon: Icons.inventory_2_outlined,
+                  label: data.parcelType.validate().isNotEmpty
+                      ? data.parcelType.validate()
+                      : 'Standard',
+                ),
+                const SizedBox(width: 8),
+                _buildMetricChip(
+                  icon: Icons.payments_outlined,
+                  label: printAmount(data.totalAmount ?? 0),
+                ),
+                const SizedBox(width: 8),
+                _buildMetricChip(
+                  icon: Icons.route_outlined,
+                  label: _tripDistanceMetric(data),
+                ),
+              ],
+            ),
+          ),
+
+          // Actions
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                if (showMainAction && primaryActionText.isNotEmpty)
+                  DriverPrimaryButton(
+                    label: primaryActionText,
+                    leading: _mainActionIcon(itemStatus),
+                    onTap: () => _handleOrderActionTap(data),
+                    height: 52,
+                  ),
+                
+                const SizedBox(height: 8),
+                
+                Row(
+                  children: [
+                    if (itemStatus != ORDER_DELIVERED &&
+                        itemStatus != ORDER_CANCELLED)
+                      Expanded(
+                        child: DriverSecondaryButton(
+                          label: 'Navigate',
+                          leading: Icons.navigation_outlined,
+                          onTap: () => onTapNavigation(data),
+                        ),
+                      ),
+                    if (itemStatus != ORDER_DELIVERED &&
+                        itemStatus != ORDER_CANCELLED &&
+                        itemStatus == ORDER_ASSIGNED) ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            showConfirmDialogCustom(
+                              context,
+                              primaryColor: Colors.red,
+                              dialogType: DialogType.CONFIRMATION,
+                              title: language.orderCancelConfirmation,
+                              positiveText: language.yes,
+                              negativeText: language.no,
+                              onAccept: (c) async {
+                                await cancelOrder(data);
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.close, size: 18),
+                          label: Text(language.cancel),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            backgroundColor: const Color(0xFFFFF1F2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                         ),
-                      )
-                    : const Icon(Icons.local_shipping_outlined, size: 18),
-                label: Text(
-                  'Ongoing Job',
-                  style: boldTextStyle(color: Colors.white, size: 14),
+                      ),
+                    ],
+                  ],
                 ),
-              ),
+              ],
             ),
           ),
         ],
       ),
-      floatingActionButton: (_canOpenCrispChat)
-          ? FloatingActionButton(
-              onPressed: () async {
-                await openCrispSupportChat();
-              },
-              backgroundColor: ColorUtils.colorPrimary,
-              child: CachedNetworkImage(
-                imageUrl: crispChatIcon ?? "",
-                errorWidget: (context, url, error) =>
-                    const Icon(Icons.chat_bubble_outline),
+    );
+  }
+
+  Widget _buildLocationRow({
+    required String label,
+    required String address,
+    required Color iconColor,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 3),
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: iconColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF6B7280),
+                ),
               ),
-            ).paddingAll(10)
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+              const SizedBox(height: 2),
+              Text(
+                address,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF111827),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricChip({
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: DriverPalette.primaryLight,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: DriverPalette.primary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: DriverPalette.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingMapButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: _openMapView,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.map_outlined,
+                  color: DriverPalette.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Map View',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingOngoingButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F766E),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F766E).withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: _isOpeningOngoingOrder ? null : _openOngoingDeliveryJob,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isOpeningOngoingOrder)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                else
+                  const Icon(
+                    Icons.local_shipping_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Ongoing Job',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -2443,5 +3147,47 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
       return language.confirmDelivery;
     }
     return '';
+  }
+}
+
+class _MiniRoutePainter extends CustomPainter {
+  final Color routeColor;
+
+  _MiniRoutePainter({required this.routeColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint routePaint = Paint()
+      ..color = routeColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round;
+
+    final Path route = Path()
+      ..moveTo(size.width * 0.15, size.height * 0.65)
+      ..quadraticBezierTo(
+        size.width * 0.35,
+        size.height * 0.45,
+        size.width * 0.55,
+        size.height * 0.50,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.75,
+        size.height * 0.55,
+        size.width * 0.85,
+        size.height * 0.35,
+      );
+    
+    canvas.drawPath(route, routePaint);
+
+    // Waypoint dots
+    final Paint dotPaint = Paint()..color = routeColor;
+    canvas.drawCircle(Offset(size.width * 0.40, size.height * 0.48), 2.5, dotPaint);
+    canvas.drawCircle(Offset(size.width * 0.65, size.height * 0.45), 2.5, dotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MiniRoutePainter oldDelegate) {
+    return oldDelegate.routeColor != routeColor;
   }
 }

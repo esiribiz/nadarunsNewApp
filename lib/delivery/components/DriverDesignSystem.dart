@@ -48,7 +48,11 @@ class DriverPalette {
   // Borders & Dividers
   static const Color borderLight = Color(0xFFE5E7EB);    // Light borders
   static const Color borderMedium = Color(0xFFD1D5DB);   // Medium borders
+  static const Color cardBorder = Color(0xFFE5E7EB);     // Card borders
   static const Color divider = Color(0xFFF3F4F6);        // Soft dividers
+  
+  // Backgrounds
+  static const Color softBackground = Color(0xFFF8FAFC); // Soft light background
   
   // Shadows
   static const Color shadowLight = Color(0x0A000000);    // 4% black
