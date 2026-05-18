@@ -338,7 +338,7 @@ class DriverTrackingScreenState extends State<DriverTrackingScreen> {
             title: 'Pickup',
             snippet: order.pickupPoint?.address.validate(),
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon: await getOriginMarkerIcon(),
         ),
       );
     }
@@ -352,7 +352,7 @@ class DriverTrackingScreenState extends State<DriverTrackingScreen> {
             title: 'Drop-off',
             snippet: order.deliveryPoint?.address.validate(),
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          icon: await getDestinationMarkerIcon(),
         ),
       );
     }

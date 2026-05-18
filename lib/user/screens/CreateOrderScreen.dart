@@ -2910,9 +2910,7 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
                                   infoWindow: InfoWindow(
                                     title: language.sourceLocation,
                                   ),
-                                  icon: BitmapDescriptor.defaultMarkerWithHue(
-                                    BitmapDescriptor.hueRed,
-                                  ),
+                                  icon: await getOriginMarkerIcon(),
                                 ),
                               );
                               markers.add(
@@ -2925,9 +2923,7 @@ class CreateOrderScreenState extends State<CreateOrderScreen> {
                                   infoWindow: InfoWindow(
                                     title: language.destinationLocation,
                                   ),
-                                  icon: BitmapDescriptor.defaultMarkerWithHue(
-                                    BitmapDescriptor.hueRed,
-                                  ),
+                                  icon: await getDestinationMarkerIcon(),
                                 ),
                               );
                               selectedTabIndex = 3;
