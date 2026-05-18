@@ -23,7 +23,7 @@ class EnRouteToPickupScreen extends StatefulWidget {
 
   const EnRouteToPickupScreen({
     super.key,
-    this.orderData,
+    this.order,
     this.onArrivedAtPickup,
     this.onCancelTrip,
     this.onContactCustomer,
@@ -101,29 +101,32 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
       ));
     }
 
-    // Pickup location
-    if (order.fromLatitude != null && order.fromLongitude != null) {
+    // Pickup location - using pickupPoint from OrderData model
+    if (order.pickupPoint != null && 
+        order.pickupPoint!.latitude != null && 
+        order.pickupPoint!.longitude != null) {
       _markers.add(Marker(
         markerId: const MarkerId('pickup'),
-        position: LatLng(order.fromLatitude!, order.fromLongitude!),
+        position: LatLng(double.parse(order.pickupPoint!.latitude!), double.parse(order.pickupPoint!.longitude!)),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         infoWindow: InfoWindow(
           title: 'Pickup Location',
-          snippet: order.fromAddress ?? 'Pickup point',
+          snippet: order.pickupPoint!.address ?? 'Pickup point',
         ),
       ));
     }
 
-    // Draw active route
+    // Draw active route - from current location to pickup point
     if (order.latitude != null &&
-        order.fromLatitude != null &&
+        order.pickupPoint != null &&
+        order.pickupPoint!.latitude != null &&
         order.longitude != null &&
-        order.fromLongitude != null) {
+        order.pickupPoint!.longitude != null) {
       _polylines.add(Polyline(
         polylineId: const PolylineId('active_route'),
         points: [
-          LatLng(order.latitude!, order.longitude!),
-          LatLng(order.fromLatitude!, order.fromLongitude!),
+          LatLng(double.parse(order.latitude!), double.parse(order.longitude!)),
+          LatLng(double.parse(order.pickupPoint!.latitude!), double.parse(order.pickupPoint!.longitude!)),
         ],
         color: DriverPalette.routeLineActive,
         width: 6,
@@ -138,11 +141,13 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
     if (widget.order == null || _mapController == null) return;
 
     final order = widget.order!;
-    if (order.latitude != null && order.fromLatitude != null) {
-      final lat1 = order.latitude!;
-      final lat2 = order.fromLatitude!;
-      final lng1 = order.longitude ?? 0;
-      final lng2 = order.fromLongitude ?? 0;
+    if (order.latitude != null && 
+        order.pickupPoint != null &&
+        order.pickupPoint!.latitude != null) {
+      final lat1 = double.parse(order.latitude!);
+      final lat2 = double.parse(order.pickupPoint!.latitude!);
+      final lng1 = order.longitude != null ? double.parse(order.longitude!) : 0;
+      final lng2 = order.pickupPoint!.longitude != null ? double.parse(order.pickupPoint!.longitude!) : 0;
 
       final bounds = LatLngBounds(
         southwest: LatLng(lat1 < lat2 ? lat1 : lat2, lng1 < lng2 ? lng1 : lng2),
