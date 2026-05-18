@@ -1,72 +1,42 @@
 ```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.class
-*.exe
-*.dll
-*.so
-*.a
-*.out
+# Dependency directories
+.dart_tool/
+.build/
+dependencies/
 
-# Dependencies
-node_modules/
-venv/
-.venv/
-.env
-.env.local
-.env.*
-
-# Build directories
-dist/
+# Build outputs
 build/
-target/
-.gradle/
+*.apk
+*.aab
+*.ipa
+*.app
 
-# Python specific
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-.Python
-*.so
-.Python
-*.egg-info/
-.eggs/
-.mypy_cache/
-.pytest_cache/
-.coverage
-coverage/
-
-# Logs and temp files
-*.log
-*.tmp
+# IDE files
+.idea/
+.vscode/
 *.swp
 *.swo
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+*.env.*
 
 # OS generated files
 .DS_Store
 Thumbs.db
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Icon?
-Network Trash Folder
-Temporary Items
-.apdisk
 
-# IDE specific
-.vscode/
-.idea/
-*.iml
-*.ipr
-*.iws
-*.swp
-*.swo
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Temporary files
+*.tmp
+*.temp
 
 # Compressed files
 *.zip
@@ -91,52 +61,4 @@ Temporary Items
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-
-# Dart/Flutter specific
-.dart_tool/
-.packages
-*.g.dart
-*.freezed.dart
-*.config.dart
-*.gen.dart
-*.gr.dart
-*.g.kt
-*.g.ts
-*.g.swift
-*.g.fs
-*.g.rb
-*.g.php
-*.g.cs
-*.g.java
-*.g.js
-*.g.css
-*.g.html
-*.g.xml
-*.g.json
-*.g.yaml
-*.g.yml
-*.g.toml
-*.g.ini
-*.g.cfg
-*.g.properties
-*.g.env
-*.g.secret
-*.g.key
-*.g.cert
-*.g.pem
-*.g.p12
-*.g.pfx
-*.g.ppk
-*.g.pub
-*.g.priv
-*.g.asc
-*.g.sig
-*.g.pgp
-*.g.gpg
-*.g.asc
-*.g.sig
-*.g.pgp
-*.g.gpg
-*.lock
-pubspec.lock
 ```
