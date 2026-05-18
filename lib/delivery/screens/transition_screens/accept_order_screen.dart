@@ -24,7 +24,7 @@ class AcceptOrderScreen extends StatefulWidget {
 
   const AcceptOrderScreen({
     super.key,
-    this.orderData,
+    this.order,
     this.onDecision,
     this.decisionTimeoutSeconds = 30,
   });
@@ -110,42 +110,48 @@ class _AcceptOrderScreenState extends State<AcceptOrderScreen>
 
     final order = widget.order!;
     
-    // Pickup marker
-    if (order.fromLatitude != null && order.fromLongitude != null) {
+    // Pickup marker - using pickupPoint from OrderData model
+    if (order.pickupPoint != null && 
+        order.pickupPoint!.latitude != null && 
+        order.pickupPoint!.longitude != null) {
       _markers.add(Marker(
         markerId: const MarkerId('pickup'),
-        position: LatLng(order.fromLatitude!, order.fromLongitude!),
+        position: LatLng(double.parse(order.pickupPoint!.latitude!), double.parse(order.pickupPoint!.longitude!)),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         infoWindow: InfoWindow(
           title: 'Pickup Location',
-          snippet: order.fromAddress ?? 'Pickup point',
+          snippet: order.pickupPoint!.address ?? 'Pickup point',
         ),
       ));
     }
 
-    // Dropoff marker
-    if (order.toLatitude != null && order.toLongitude != null) {
+    // Dropoff marker - using deliveryPoint from OrderData model
+    if (order.deliveryPoint != null && 
+        order.deliveryPoint!.latitude != null && 
+        order.deliveryPoint!.longitude != null) {
       _markers.add(Marker(
         markerId: const MarkerId('dropoff'),
-        position: LatLng(order.toLatitude!, order.toLongitude!),
+        position: LatLng(double.parse(order.deliveryPoint!.latitude!), double.parse(order.deliveryPoint!.longitude!)),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         infoWindow: InfoWindow(
           title: 'Dropoff Location',
-          snippet: order.toAddress ?? 'Delivery point',
+          snippet: order.deliveryPoint!.address ?? 'Delivery point',
         ),
       ));
     }
 
     // Draw route polyline
-    if (order.fromLatitude != null &&
-        order.toLatitude != null &&
-        order.fromLongitude != null &&
-        order.toLongitude != null) {
+    if (order.pickupPoint != null &&
+        order.deliveryPoint != null &&
+        order.pickupPoint!.latitude != null &&
+        order.pickupPoint!.longitude != null &&
+        order.deliveryPoint!.latitude != null &&
+        order.deliveryPoint!.longitude != null) {
       _polylines.add(Polyline(
         polylineId: const PolylineId('route'),
         points: [
-          LatLng(order.fromLatitude!, order.fromLongitude!),
-          LatLng(order.toLatitude!, order.toLongitude!),
+          LatLng(double.parse(order.pickupPoint!.latitude!), double.parse(order.pickupPoint!.longitude!)),
+          LatLng(double.parse(order.deliveryPoint!.latitude!), double.parse(order.deliveryPoint!.longitude!)),
         ],
         color: DriverPalette.routeLine,
         width: 4,
@@ -161,11 +167,14 @@ class _AcceptOrderScreenState extends State<AcceptOrderScreen>
     if (widget.order == null || _mapController == null) return;
 
     final order = widget.order!;
-    if (order.fromLatitude != null && order.toLatitude != null) {
-      final lat1 = order.fromLatitude!;
-      final lat2 = order.toLatitude!;
-      final lng1 = order.fromLongitude ?? 0;
-      final lng2 = order.toLongitude ?? 0;
+    if (order.pickupPoint != null && 
+        order.deliveryPoint != null &&
+        order.pickupPoint!.latitude != null && 
+        order.deliveryPoint!.latitude != null) {
+      final lat1 = double.parse(order.pickupPoint!.latitude!);
+      final lat2 = double.parse(order.deliveryPoint!.latitude!);
+      final lng1 = order.pickupPoint!.longitude != null ? double.parse(order.pickupPoint!.longitude!) : 0;
+      final lng2 = order.deliveryPoint!.longitude != null ? double.parse(order.deliveryPoint!.longitude!) : 0;
 
       final bounds = LatLngBounds(
         southwest: LatLng(lat1 < lat2 ? lat1 : lat2, lng1 < lng2 ? lng1 : lng2),
@@ -229,8 +238,8 @@ class _AcceptOrderScreenState extends State<AcceptOrderScreen>
           Positioned.fill(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: order?.fromLatitude != null
-                    ? LatLng(order!.fromLatitude!, order.fromLongitude ?? 0)
+                target: order?.pickupPoint?.latitude != null
+                    ? LatLng(double.parse(order!.pickupPoint!.latitude!), double.parse(order.pickupPoint!.longitude ?? '0'))
                     : const LatLng(0, 0),
                 zoom: 12,
               ),

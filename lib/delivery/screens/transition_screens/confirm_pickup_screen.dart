@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../main/models/OrderListModel.dart';
+import '../../widgets/map_placeholder_widget.dart';
 
 /// Screen 4: Confirm Pickup
 /// Driver has arrived at pickup location. 
@@ -23,6 +24,8 @@ class ConfirmPickupScreen extends StatefulWidget {
 class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _pulseAnimation;
   bool _isConfirming = false;
   
   // Map controller
@@ -39,6 +42,17 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    );
+    
+    _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(0.0, 1.0, curve: Curves.repeat(reverse: true)),
+      ),
     );
 
     _controller.forward();
@@ -81,9 +95,6 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
         setState(() {
           _isConfirming = false;
         });
-      }
-    }
-  }
       }
     }
   }

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
-import '../../../services/order_service.dart';
-import '../../../models/order.dart';
-import '../../../widgets/map_placeholder_widget.dart';
+import '../../../main/models/OrderListModel.dart';
+import '../../widgets/map_placeholder_widget.dart';
 
 /// Screen 5: En Route to Dropoff
 /// Driver has picked up order and is navigating to customer location
-class EnRouteToDropoffScreen extends StatefulWidget {
-  final Order order;
+class EnRouteDropoffScreen extends StatefulWidget {
+  final OrderData order;
 
-  const EnRouteToDropoffScreen({Key? key, required this.order}) : super(key: key);
+  const EnRouteDropoffScreen({Key? key, required this.order}) : super(key: key);
 
   @override
-  State<EnRouteToDropoffScreen> createState() => _EnRouteToDropoffScreenState();
+  State<EnRouteDropoffScreen> createState() => _EnRouteDropoffScreenState();
 }
 
-class _EnRouteToDropoffScreenState extends State<EnRouteToDropoffScreen>
+class _EnRouteDropoffScreenState extends State<EnRouteDropoffScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;

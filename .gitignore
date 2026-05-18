@@ -1,3 +1,24 @@
-(DO NOT IGNORE THE SOURCE CODE FILES LIKE .DART FILES UNLESS THEY ARE CLEARLY GENERATED OR SENSITIVE. THE CHANGE LIST CONTAINS ONLY A SOURCE FILE, SO NO ADDITIONAL IGNORES ARE NEEDED.)
+```
+# Dependencies
+.dart_tool/
+.packages
+.pub-cache/
+pubspec.lock
 
-(empty — output nothing)
+# Build
+build/
+**/generated_*
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Logs
+*.log
+**/logs
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```

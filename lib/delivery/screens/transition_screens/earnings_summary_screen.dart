@@ -577,13 +577,6 @@ class _EarningsSummaryScreenState extends State<EarningsSummaryScreen>
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year} at '
-           '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-
   Widget _buildNextScreen() {
     // Navigate to rating/feedback screen using callback
     widget.onComplete();
