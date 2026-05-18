@@ -349,7 +349,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
             title: 'Pickup',
             snippet: order.pickupPoint?.address.validate(),
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon: await getOriginMarkerIcon(),
         ),
       );
     }
@@ -363,7 +363,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
             title: 'Drop-off',
             snippet: order.deliveryPoint?.address.validate(),
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          icon: await getDestinationMarkerIcon(),
         ),
       );
     }
