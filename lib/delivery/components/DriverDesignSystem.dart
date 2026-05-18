@@ -2,39 +2,117 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../main/utils/Constants.dart';
 
+/// Modern Premium Logistics Design System
+/// Inspired by Uber Driver, Wolt Courier, Bolt Driver, and DoorDash
+/// 
+/// Design Principles:
+/// - Map-first interface with floating bottom sheets
+/// - Clean, minimal, premium aesthetic
+/// - One-hand usability for drivers
+/// - High contrast while driving
+/// - Scandinavian modern UI
+
 class DriverPalette {
-  static const Color surface = Color(0xFF07090F);
-  static const Color surfaceAlt = Color(0xFF131725);
-  static const Color primary = Color(0xFF573391);
-  static const Color primaryDark = Color(0xFF462A77);
-  static const Color accent = Color(0xFF22C55E);
-  static const Color textPrimary = Color(0xFFF8FAFC);
-  static const Color textSecondary = Color(0xFFC5CBD9);
-  static const Color cardBorder = Color(0xFFE4E8F0);
-  static const Color cardBackground = Colors.white;
-  static const Color softBackground = Color(0xFFF7F9FC);
+  // Core Brand Colors - Electric Blue Theme
+  static const Color primary = Color(0xFF0066FF);        // Electric Blue - Primary actions
+  static const Color primaryDark = Color(0xFF0052CC);    // Darker blue for pressed states
+  static const Color primaryLight = Color(0xFFE6F0FF);   // Light blue for backgrounds
+  
+  // Surface Colors
+  static const Color surface = Color(0xFF0A0E1A);        // Deep black-blue background
+  static const Color surfaceAlt = Color(0xFF151A28);     // Slightly lighter surface
+  static const Color surfaceCard = Color(0xFFFFFFFF);    // White cards
+  static const Color surfaceFloating = Color(0xFFFFFFFF); // Floating sheets
+  
+  // Text Colors
+  static const Color textPrimary = Color(0xFF0A0E1A);    // Nearly black for light backgrounds
+  static const Color textPrimaryInverse = Color(0xFFFFFFFF); // White for dark backgrounds
+  static const Color textSecondary = Color(0xFF6B7280);  // Gray for secondary text
+  static const Color textTertiary = Color(0xFF9CA3AF);   // Light gray for hints
+  
+  // Status Colors
+  static const Color success = Color(0xFF10B981);        // Green for completed/delivered
+  static const Color warning = Color(0xFFF59E0B);        // Amber for pending/waiting
+  static const Color error = Color(0xFFEF4444);          // Red for cancelled/errors
+  static const Color info = Color(0xFF3B82F6);           // Blue for info states
+  
+  // Navigation & Routes
+  static const Color routeLine = Color(0xFF0066FF);      // Bright blue navigation routes
+  static const Color routeLineActive = Color(0xFF00D4AA); // Teal for active route
+  
+  // Map & Location
+  static const Color mapPinOrigin = Color(0xFF0066FF);   // Blue pickup pin
+  static const Color mapPinDestination = Color(0xFF10B981); // Green dropoff pin
+  static const Color mapDriverLocation = Color(0xFF000000); // Black driver dot
+  
+  // Borders & Dividers
+  static const Color borderLight = Color(0xFFE5E7EB);    // Light borders
+  static const Color borderMedium = Color(0xFFD1D5DB);   // Medium borders
+  static const Color divider = Color(0xFFF3F4F6);        // Soft dividers
+  
+  // Shadows
+  static const Color shadowLight = Color(0x0A000000);    // 4% black
+  static const Color shadowMedium = Color(0x14000000);   // 8% black
+  static const Color shadowHeavy = Color(0x1F000000);    // 12% black
+  
+  // Special Effects
+  static const Color pulse = Color(0x400066FF);          // Pulsing animation
+  static const Color overlay = Color(0x80000000);        // Modal overlays
+  
+  // Earnings
+  static const Color earningsBackground = Color(0xFFF0FDF4); // Light green bg
+  static const Color earningsText = Color(0xFF059669);   // Dark green text
+  
+  // Online/Offline
+  static const Color online = Color(0xFF10B981);         // Green online indicator
+  static const Color offline = Color(0xFF9CA3AF);        // Gray offline indicator
 }
 
+/// Status color mapping for order states
 Color driverStatusColor(String status) {
   switch (status) {
     case ORDER_PENDING:
-      return const Color(0xFFF59E0B);
+      return DriverPalette.warning;
     case ORDER_ASSIGNED:
-      return const Color(0xFF8B5CF6);
+      return DriverPalette.info;
     case ORDER_ACCEPTED:
-      return const Color(0xFF2563EB);
+      return DriverPalette.primary;
     case ORDER_ARRIVED:
       return const Color(0xFF0EA5E9);
     case ORDER_PICKED_UP:
-      return const Color(0xFF06B6D4);
+      return DriverPalette.routeLineActive;
     case ORDER_DEPARTED:
       return const Color(0xFF6366F1);
     case ORDER_DELIVERED:
-      return const Color(0xFF10B981);
+      return DriverPalette.success;
     case ORDER_CANCELLED:
-      return const Color(0xFFEF4444);
+      return DriverPalette.error;
     default:
-      return const Color(0xFF64748B);
+      return DriverPalette.textSecondary;
+  }
+}
+
+/// Get status label for order
+String getStatusLabel(String status) {
+  switch (status) {
+    case ORDER_PENDING:
+      return 'Pending';
+    case ORDER_ASSIGNED:
+      return 'Assigned';
+    case ORDER_ACCEPTED:
+      return 'Accepted';
+    case ORDER_ARRIVED:
+      return 'Arrived';
+    case ORDER_PICKED_UP:
+      return 'Picked Up';
+    case ORDER_DEPARTED:
+      return 'In Transit';
+    case ORDER_DELIVERED:
+      return 'Delivered';
+    case ORDER_CANCELLED:
+      return 'Cancelled';
+    default:
+      return status;
   }
 }
 
@@ -58,27 +136,22 @@ class DriverStageShell extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
         child: Ink(
           decoration: BoxDecoration(
-            color: DriverPalette.cardBackground,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: DriverPalette.cardBorder),
+            color: DriverPalette.surfaceCard,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: DriverPalette.borderLight),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 16,
+                color: DriverPalette.shadowMedium,
+                blurRadius: 24,
                 offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: DriverPalette.primary.withValues(alpha: 0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [header, mapPreview, details],
@@ -187,58 +260,68 @@ class _DriverMapPreviewPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint bgPaint = Paint()..color = DriverPalette.softBackground;
+    // Background - soft light gray
+    final Paint bgPaint = Paint()..color = DriverPalette.divider;
+    
+    // Street lines - subtle gray
     final Paint streetPaint = Paint()
-      ..color = const Color(0xFFE2E8F0)
+      ..color = const Color(0xFFE5E7EB)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+      ..strokeWidth = 1.5;
+    
+    // Route line - electric blue with smooth stroke
     final Paint routePaint = Paint()
       ..color = routeColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.2
+      ..strokeWidth = 4.0
       ..strokeCap = StrokeCap.round;
 
+    // Draw background
     canvas.drawRect(Offset.zero & size, bgPaint);
 
-    for (double y = 12; y < size.height; y += 24) {
+    // Draw horizontal streets
+    for (double y = 16; y < size.height; y += 28) {
       final Path street = Path()
         ..moveTo(0, y)
-        ..quadraticBezierTo(size.width * 0.35, y + 8, size.width, y - 2);
+        ..quadraticBezierTo(size.width * 0.35, y + 6, size.width, y - 3);
       canvas.drawPath(street, streetPaint);
     }
 
-    for (double x = 24; x < size.width; x += 44) {
+    // Draw vertical streets
+    for (double x = 28; x < size.width; x += 48) {
       final Path street = Path()
         ..moveTo(x, 0)
-        ..quadraticBezierTo(x - 10, size.height * 0.4, x + 8, size.height);
+        ..quadraticBezierTo(x - 8, size.height * 0.4, x + 6, size.height);
       canvas.drawPath(street, streetPaint);
     }
 
+    // Draw main route path - smooth bezier curve
     final Path route = Path()
-      ..moveTo(size.width * 0.2, size.height * 0.74)
+      ..moveTo(size.width * 0.18, size.height * 0.76)
       ..quadraticBezierTo(
-        size.width * 0.35,
-        size.height * 0.48,
-        size.width * 0.52,
-        size.height * 0.55,
+        size.width * 0.32,
+        size.height * 0.52,
+        size.width * 0.50,
+        size.height * 0.58,
       )
       ..quadraticBezierTo(
-        size.width * 0.66,
-        size.height * 0.6,
-        size.width * 0.78,
-        size.height * 0.32,
+        size.width * 0.68,
+        size.height * 0.62,
+        size.width * 0.82,
+        size.height * 0.28,
       );
     canvas.drawPath(route, routePaint);
 
+    // Route waypoints
     final Paint nodePaint = Paint()..color = routeColor;
     canvas.drawCircle(
-      Offset(size.width * 0.42, size.height * 0.56),
-      3,
+      Offset(size.width * 0.40, size.height * 0.58),
+      3.5,
       nodePaint,
     );
     canvas.drawCircle(
-      Offset(size.width * 0.58, size.height * 0.57),
-      3,
+      Offset(size.width * 0.60, size.height * 0.55),
+      3.5,
       nodePaint,
     );
   }
@@ -259,19 +342,20 @@ class DriverCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: margin ?? const EdgeInsets.only(bottom: 14),
-      padding: padding ?? const EdgeInsets.all(14),
+      margin: margin ?? const EdgeInsets.only(bottom: 16),
+      padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: DriverPalette.cardBackground,
-        borderRadius: BorderRadius.circular(18),
+        color: DriverPalette.surfaceCard,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: DriverPalette.cardBorder.withValues(alpha: 0.75),
+          color: DriverPalette.borderLight,
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: DriverPalette.shadowMedium,
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -280,76 +364,181 @@ class DriverCard extends StatelessWidget {
   }
 }
 
+/// Modern status chip with subtle background and bold text
 class DriverStatusChip extends StatelessWidget {
   final String label;
   final Color color;
+  final bool showBackground;
 
-  const DriverStatusChip({super.key, required this.label, required this.color});
+  const DriverStatusChip({
+    super.key, 
+    required this.label, 
+    required this.color,
+    this.showBackground = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: showBackground ? color.withValues(alpha: 0.12) : Colors.transparent,
         borderRadius: BorderRadius.circular(999),
+        border: showBackground ? null : Border.all(color: color, width: 1.5),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
+/// Large, touch-friendly primary action button
+/// Designed for one-hand operation while driving
 class DriverPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
   final IconData? leading;
+  final IconData? trailing;
   final bool isLoading;
+  final bool enabled;
+  final Color? backgroundColor;
+  final double height;
 
   const DriverPrimaryButton({
     super.key,
     required this.label,
     this.onTap,
     this.leading,
+    this.trailing,
     this.isLoading = false,
+    this.enabled = true,
+    this.backgroundColor,
+    this.height = 56,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
+      height: height,
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: DriverPalette.primary,
+          backgroundColor: backgroundColor ?? DriverPalette.primary,
           foregroundColor: Colors.white,
+          disabledBackgroundColor: DriverPalette.textTertiary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w700, 
+            fontSize: 16,
+            letterSpacing: 0.3,
+          ),
         ),
-        onPressed: isLoading ? null : onTap,
+        onPressed: (isLoading || !enabled) ? null : onTap,
         child: isLoading
             ? const SizedBox(
-                width: 20,
-                height: 20,
+                width: 24,
+                height: 24,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.2,
+                  strokeWidth: 2.5,
                   color: Colors.white,
                 ),
               )
             : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (leading != null) ...[
-                    Icon(leading, size: 18),
+                    Icon(leading, size: 20),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(label),
+                  if (trailing != null) ...[
+                    const SizedBox(width: 8),
+                    Icon(trailing, size: 20),
+                  ],
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+/// Secondary outline button for less prominent actions
+class DriverSecondaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onTap;
+  final IconData? leading;
+  final bool isLoading;
+  final Color? borderColor;
+  final Color? textColor;
+
+  const DriverSecondaryButton({
+    super.key,
+    required this.label,
+    this.onTap,
+    this.leading,
+    this.isLoading = false,
+    this.borderColor,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = borderColor ?? DriverPalette.primary;
+    return SizedBox(
+      height: 52,
+      width: double.infinity,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: textColor ?? color,
+          side: BorderSide(color: color, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w700, 
+            fontSize: 15,
+          ),
+        ),
+        onPressed: isLoading ? null : onTap,
+        child: isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (leading != null) ...[
+                    Icon(leading, size: 19, color: color),
                     const SizedBox(width: 8),
                   ],
                   Text(label),
@@ -373,30 +562,37 @@ class DriverOnlineToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color stateColor = isOnline
-        ? DriverPalette.accent
-        : const Color(0xFF94A3B8);
+        ? DriverPalette.online
+        : DriverPalette.offline;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.18),
+        color: isOnline 
+            ? DriverPalette.online.withValues(alpha: 0.15)
+            : DriverPalette.textTertiary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+        border: Border.all(
+          color: isOnline 
+              ? DriverPalette.online.withValues(alpha: 0.3)
+              : DriverPalette.textTertiary.withValues(alpha: 0.3),
+          width: 1.0,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 9,
-            height: 9,
+            width: 8,
+            height: 8,
             decoration: BoxDecoration(
               color: stateColor,
               shape: BoxShape.circle,
               boxShadow: isOnline
                   ? [
                       BoxShadow(
-                        color: DriverPalette.accent.withValues(alpha: 0.55),
+                        color: DriverPalette.online.withValues(alpha: 0.5),
                         blurRadius: 8,
                         spreadRadius: 1,
                       ),
@@ -407,18 +603,20 @@ class DriverOnlineToggle extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             isOnline ? 'Online' : 'Offline',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: stateColor,
               fontWeight: FontWeight.w700,
-              fontSize: 13,
+              fontSize: 14,
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           Switch.adaptive(
             value: isOnline,
             onChanged: onChanged,
-            activeThumbColor: DriverPalette.accent,
-            activeTrackColor: DriverPalette.accent.withValues(alpha: 0.35),
+            activeThumbColor: DriverPalette.online,
+            activeTrackColor: DriverPalette.online.withValues(alpha: 0.35),
+            inactiveThumbColor: DriverPalette.textTertiary,
+            inactiveTrackColor: DriverPalette.textTertiary.withValues(alpha: 0.3),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -661,49 +859,58 @@ class DriverAddressRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color dotColor = isPickup
-        ? const Color(0xFF22C55E)
-        : const Color(0xFF3B82F6);
+        ? DriverPalette.mapPinDestination
+        : DriverPalette.mapPinOrigin;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 6),
+              padding: const EdgeInsets.only(top: 5),
               child: Container(
-                width: 10,
-                height: 10,
+                width: 12,
+                height: 12,
                 decoration: BoxDecoration(
                   color: dotColor,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: dotColor.withValues(alpha: 0.3),
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF64748B),
+                      color: DriverPalette.textTertiary,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     address,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF0F172A),
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: DriverPalette.textPrimary,
                       fontWeight: FontWeight.w600,
+                      height: 1.3,
                     ),
                   ),
                 ],
@@ -712,12 +919,13 @@ class DriverAddressRow extends StatelessWidget {
             if (onCall != null)
               InkWell(
                 onTap: onCall,
-                child: const Padding(
-                  padding: EdgeInsets.only(top: 4, left: 8),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
                   child: Icon(
                     Icons.call_outlined,
-                    size: 18,
-                    color: Color(0xFF334155),
+                    size: 20,
+                    color: DriverPalette.primary,
                   ),
                 ),
               ),
@@ -728,13 +936,185 @@ class DriverAddressRow extends StatelessWidget {
   }
 }
 
+/// Metric display pill for showing delivery stats
 class DriverMetricPill extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
+  final Color? iconColor;
+  final Color? backgroundColor;
 
   const DriverMetricPill({
     super.key,
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.iconColor,
+    this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? DriverPalette.primaryLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: DriverPalette.borderLight,
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon, 
+            size: 16, 
+            color: iconColor ?? DriverPalette.primary,
+          ),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: DriverPalette.textPrimary,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: DriverPalette.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Earnings summary card for displaying driver income
+class DriverEarningsCard extends StatelessWidget {
+  final String totalEarnings;
+  final String tripsCompleted;
+  final String onlineHours;
+  final VoidCallback? onViewDetails;
+
+  const DriverEarningsCard({
+    super.key,
+    required this.totalEarnings,
+    required this.tripsCompleted,
+    required this.onlineHours,
+    this.onViewDetails,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            DriverPalette.primary,
+            DriverPalette.primaryDark,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: DriverPalette.primary.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Today\'s Earnings',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (onViewDetails != null)
+                InkWell(
+                  onTap: onViewDetails,
+                  child: Row(
+                    children: [
+                      Text(
+                        'Details',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            totalEarnings,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 36,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              _StatItem(
+                label: 'Trips',
+                value: tripsCompleted,
+                icon: Icons.shopping_bag_outlined,
+              ),
+              const SizedBox(width: 24),
+              _StatItem(
+                label: 'Hours',
+                value: onlineHours,
+                icon: Icons.access_time,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _StatItem({
     required this.label,
     required this.value,
     required this.icon,
@@ -742,37 +1122,199 @@ class DriverMetricPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Customer info card with rating and details
+class DriverCustomerCard extends StatelessWidget {
+  final String customerName;
+  final double rating;
+  final int totalTrips;
+  final String? avatarUrl;
+  final VoidCallback? onCall;
+  final VoidCallback? onMessage;
+
+  const DriverCustomerCard({
+    super.key,
+    required this.customerName,
+    required this.rating,
+    required this.totalTrips,
+    this.avatarUrl,
+    this.onCall,
+    this.onMessage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: DriverPalette.softBackground,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: DriverPalette.cardBorder),
+        color: DriverPalette.surfaceCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: DriverPalette.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: DriverPalette.shadowMedium,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF475569)),
-          const SizedBox(width: 5),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // Avatar
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: DriverPalette.primaryLight,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: DriverPalette.borderLight,
+                width: 2,
+              ),
+            ),
+            child: avatarUrl != null
+                ? ClipOval(
+                    child: Image.network(
+                      avatarUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.person,
+                        size: 28,
+                        color: DriverPalette.primary,
+                      ),
+                    ),
+                  )
+                : const Icon(
+                    Icons.person,
+                    size: 28,
+                    color: DriverPalette.primary,
+                  ),
+          ),
+          const SizedBox(width: 14),
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  customerName,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: DriverPalette.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.star,
+                      size: 16,
+                      color: DriverPalette.warning,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$rating',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: DriverPalette.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      ' • $totalTrips trips',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: DriverPalette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Actions
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+              if (onMessage != null)
+                InkWell(
+                  onTap: onMessage,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: DriverPalette.primaryLight,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.message_outlined,
+                      size: 22,
+                      color: DriverPalette.primary,
+                    ),
+                  ),
                 ),
-              ),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
+              if (onMessage != null && onCall != null) const SizedBox(width: 8),
+              if (onCall != null)
+                InkWell(
+                  onTap: onCall,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: DriverPalette.success.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.call,
+                      size: 22,
+                      color: DriverPalette.success,
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
         ],

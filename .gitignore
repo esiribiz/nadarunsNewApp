@@ -1,14 +1,14 @@
-```
 # Compiled and build artifacts
-*.class
+*.pyc
+__pycache__/
 *.o
 *.obj
-*.out
+*.class
+*.exe
 *.dll
 *.so
 *.a
-*.pyc
-__pycache__/
+*.out
 
 # Dependencies
 node_modules/
@@ -24,28 +24,29 @@ build/
 target/
 .gradle/
 
-# Cache directories
-.mypy_cache/
-.pytest_cache/
-coverage/
-htmlcov/
-.cargo/
-.npm/
-.yarn/
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
 
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
+*.iml
+
+# Python specific
+*.pyc
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
 
 # System files
 .DS_Store
 Thumbs.db
-
-# Logs and temp files
-*.log
-*.tmp
 
 # Compressed files
 *.zip
@@ -70,4 +71,3 @@ Thumbs.db
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-```
