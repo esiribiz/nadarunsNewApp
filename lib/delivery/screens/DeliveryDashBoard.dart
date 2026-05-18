@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:nadaruns_delivery/delivery/fragment/DHomeFragment.dart';
+import 'package:nadaruns_delivery/delivery/controllers/delivery_transition_controller.dart';
 import 'package:nadaruns_delivery/main/services/VersionServices.dart';
 import '../components/DriverDesignSystem.dart';
 import '../../delivery/screens/OrdersMapScreen.dart';
@@ -145,7 +146,17 @@ class DeliveryDashBoardState extends State<DeliveryDashBoard>
     if (!_isSequentiallyManagedStatus(activeStatus)) return;
     FlutterRingtonePlayer().stop();
 
+    // Use new transition controller for accepting orders
     if (activeStatus == ORDER_PENDING || activeStatus == ORDER_ASSIGNED) {
+      try {
+        final controller = DeliveryTransitionController(context: context);
+        await controller.startAcceptOrderFlow(data);
+        return;
+      } catch (e) {
+        // Fallback to old flow if new screens fail
+        debugPrint('Error in new transition flow: $e');
+      }
+      
       appStore.setLoading(true);
       await onTapData(
         orderData: data,

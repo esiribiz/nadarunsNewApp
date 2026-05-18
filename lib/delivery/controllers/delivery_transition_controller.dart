@@ -42,8 +42,13 @@ class DeliveryTransitionController {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => AcceptOrderScreen(
           order: order,
-          onAccept: () => _handleOrderAccepted(order),
-          onReject: () => _handleOrderRejected(order),
+          onDecision: (accepted) {
+            if (accepted) {
+              _handleOrderAccepted(order);
+            } else {
+              _handleOrderRejected(order);
+            }
+          },
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
@@ -69,16 +74,20 @@ class DeliveryTransitionController {
     try {
       appStore.setLoading(true);
       
-      // Call existing backend API - DO NOT CHANGE THIS LOGIC
-      await updateOrder(
-        orderStatus: ORDER_ACCEPTED,
+      // Call new acceptOrder API which uses assign-order-update endpoint
+      final response = await acceptOrder(
         orderId: order.id!,
+        status: ORDER_ACCEPTED,
       );
       
       appStore.setLoading(false);
       
-      // Navigate to next screen in flow
-      _navigateToPickupScreen(order);
+      if (response.success == true) {
+        // Navigate to next screen in flow
+        _navigateToPickupScreen(order);
+      } else {
+        throw Exception(response.message ?? 'Failed to accept order');
+      }
       
     } catch (e) {
       appStore.setLoading(false);
