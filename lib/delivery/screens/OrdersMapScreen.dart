@@ -350,6 +350,42 @@ class _OrdersMapScreenState extends State<OrdersMapScreen> {
       toast('Job accepted successfully');
       _isInfoWindowVisible = false;
       selectedInfoWindow = null;
+      
+      // Fetch the accepted order and navigate to ReceivedScreenOrderScreen
+      final List<String> preferredStatuses = [
+        ORDER_ACCEPTED,
+        ORDER_ARRIVED,
+        ORDER_PICKED_UP,
+        ORDER_DEPARTED,
+      ];
+      
+      OrderData? acceptedOrder;
+      for (final orderStatus in preferredStatuses) {
+        final response = await getDeliveryBoyOrderList(
+          page: 1,
+          deliveryBoyID: getIntAsync(USER_ID),
+          cityId: getIntAsync(CITY_ID),
+          countryId: getIntAsync(COUNTRY_ID),
+          orderStatus: orderStatus,
+        );
+        final List<OrderData> data = response.data ?? [];
+        if (data.isEmpty) continue;
+        data.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
+        final order = data.firstWhere((o) => o.id == orderId, orElse: () => data.first);
+        acceptedOrder = order;
+        break;
+      }
+      
+      if (acceptedOrder != null) {
+        final bool shouldShowPayment = acceptedOrder.paymentId == null || 
+            acceptedOrder.paymentId == 0;
+        
+        await ReceivedScreenOrderScreen(
+          orderData: acceptedOrder,
+          isShowPayment: shouldShowPayment,
+        ).launch(context, pageRouteAnimation: PageRouteAnimation.Fade);
+      }
+      
       await getLatLngOfOrdersApi(showLoader: true);
     } catch (e) {
       toast(e.toString());
