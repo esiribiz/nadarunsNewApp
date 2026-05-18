@@ -1,37 +1,78 @@
 ```
-# Flutter/Dart specific
-.dart_tool/
-.packages
-.pub-cache/
-pubspec.lock
-
-# Build outputs
-build/
-*.apk
-*.aab
-*.ipa
-*.app
-
-# IDE files
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Logs
-*.log
-*.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
 node_modules/
-vendor/
+venv/
+.venv/
+.env
+.env.local
+.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Distribution / packaging
+dist/
+build/
+*.tar.gz
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
 
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Python specific
+.mypy_cache/
+.pytest_cache/
+
+# Java/Gradle
+target/
+.gradle/
+
+# Dart/Flutter (since we see .dart files in changes)
+.dart_tool/
+.packages
+*.g.dart
+*.freezed.dart
+
 ```

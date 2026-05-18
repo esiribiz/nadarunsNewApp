@@ -168,6 +168,7 @@ class OrderData {
   var get distance => totalDistance;
   String? get estimatedDeliveryTime => deliveryDatetime;
   num? get customerRating => ratingDetail?.rating;
+  num? get deliveryManCommission => totalAmount; // Added for earnings summary
   
   // Additional computed properties for driver location compatibility
   String? get latitude => pickupPoint?.latitude;
