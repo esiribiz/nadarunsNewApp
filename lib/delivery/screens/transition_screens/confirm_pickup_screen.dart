@@ -1,107 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'dart:async';
-import '../../../services/order_service.dart';
-import '../../../models/order.dart';
-import '../../../widgets/map_placeholder_widget.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../../main/models/OrderListModel.dart';
 
 /// Screen 4: Confirm Pickup
-/// Driver has arrived at pickup location and needs to confirm order collection
+/// Driver has arrived at pickup location. 
+/// Shows customer details, order items, and "Confirm Pickup" action.
 class ConfirmPickupScreen extends StatefulWidget {
-  final Order order;
+  final OrderData order; // Existing OrderModel
+  final Function()? onConfirmPickup; // Existing logic trigger
 
-  const ConfirmPickupScreen({Key? key, required this.order}) : super(key: key);
+  const ConfirmPickupScreen({
+    Key? key,
+    required this.order,
+    this.onConfirmPickup,
+  }) : super(key: key);
 
   @override
   State<ConfirmPickupScreen> createState() => _ConfirmPickupScreenState();
 }
 
-class _ConfirmPickupScreenState extends State<ConfirmPickupScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _pulseAnimation;
-  late Animation<double> _slideAnimation;
-  bool _isProcessing = false;
-  Timer? _autoCloseTimer;
+class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  bool _isConfirming = false;
+  
+  // Map controller
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
     super.initState();
     
-    _animationController = AnimationController(
+    _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 1200),
     );
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
 
-    _slideAnimation = Tween<double>(begin: 100.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
-
-    _animationController.forward();
-
-    // Auto-haptic feedback after arrival
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        // Haptic feedback would go here
-      }
-    });
+    _controller.forward();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _autoCloseTimer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
   Future<void> _confirmPickup() async {
-    if (_isProcessing) return;
+    if (_isConfirming) return;
 
     setState(() {
-      _isProcessing = true;
+      _isConfirming = true;
     });
 
     try {
-      // Vibration feedback
-      if (mounted) {
-        // HapticFeedback.heavyImpact();
+      // Trigger existing backend logic callback
+      if (widget.onConfirmPickup != null) {
+        await widget.onConfirmPickup!();
+      } else {
+        // Fallback simulation if logic not passed yet
+        await Future.delayed(const Duration(seconds: 1));
       }
 
-      // Call service to confirm pickup
-      final orderService = Provider.of<OrderService>(context, listen: false);
-      await orderService.confirmPickup(widget.order.id);
-
       if (mounted) {
-        // Navigate to next screen with smooth transition
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                _buildNextScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.0, 1.0),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutCubic,
-                )),
-                child: child,
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
+        // Navigation is handled by controller callback
+        // No need to navigate here - controller handles it
       }
     } catch (e) {
       if (mounted) {
@@ -112,8 +79,11 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen>
           ),
         );
         setState(() {
-          _isProcessing = false;
+          _isConfirming = false;
         });
+      }
+    }
+  }
       }
     }
   }
