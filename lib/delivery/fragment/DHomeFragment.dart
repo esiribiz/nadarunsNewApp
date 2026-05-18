@@ -418,7 +418,7 @@ class _DHomeFragmentState extends State<DHomeFragment> with TickerProviderStateM
             onPressed: () async {
               DProfileFragment().launch(context, pageRouteAnimation: PageRouteAnimation.SlideBottomTop);
             },
-            icon: Icon(Ionicons.settings_outline, color: Colors.white),
+            icon: Icon(Ionicons.person_outline, color: Colors.white, size: 26),
           ),
         ],
       ),
