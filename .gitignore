@@ -1,19 +1,29 @@
 ```
-# Build artifacts
-build/
-# Dependencies
-.pub/
-.packages
-# Logs and temp files
+# Dart/Flutter build artifacts
+.dart_tool/
+.build/
+bin/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
 *.log
-*.tmp
+
 # Environment
 .env
 .env.local
 *.env.*
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
+
+# Coverage
+coverage/
+*.coverage
+
+# Temporary files
+*.tmp
+.DS_Store
+Thumbs.db
 ```
