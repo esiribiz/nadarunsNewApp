@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>974587081017-7kvi6pp0nq7jmktlabknrmcp8va4o2bv.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyADVRNYXqXrj2CuLXLbDn3oIoO9tNm77jA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>974587081017</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.nadaruns.delivery</string>
+	<key>PROJECT_ID</key>
+	<string>nadaruns-369cc</string>
+	<key>STORAGE_BUCKET</key>
+	<string>nadaruns-369cc.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:974587081017:ios:4667ca5046c351dbfc38e8</string>
+	<key>DATABASE_URL</key>
+	<string>https://nadaruns-369cc-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
