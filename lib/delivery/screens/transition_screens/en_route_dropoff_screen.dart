@@ -9,8 +9,9 @@ import '../../widgets/map_placeholder_widget.dart';
 /// Driver has picked up order and is navigating to customer location
 class EnRouteDropoffScreen extends StatefulWidget {
   final OrderData order;
+  final VoidCallback? onArrivedAtDropoff;
 
-  const EnRouteDropoffScreen({Key? key, required this.order}) : super(key: key);
+  const EnRouteDropoffScreen({Key? key, required this.order, this.onArrivedAtDropoff}) : super(key: key);
 
   @override
   State<EnRouteDropoffScreen> createState() => _EnRouteDropoffScreenState();

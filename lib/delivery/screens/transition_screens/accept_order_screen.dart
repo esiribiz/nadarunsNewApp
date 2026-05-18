@@ -177,8 +177,8 @@ class _AcceptOrderScreenState extends State<AcceptOrderScreen>
       final lng2 = order.deliveryPoint!.longitude != null ? double.parse(order.deliveryPoint!.longitude!) : 0;
 
       final bounds = LatLngBounds(
-        southwest: LatLng(lat1 < lat2 ? lat1 : lat2, lng1 < lng2 ? lng1 : lng2),
-        northeast: LatLng(lat1 > lat2 ? lat1 : lat2, lng1 > lng2 ? lng1 : lng2),
+        southwest: LatLng(lat1 < lat2 ? lat1 : lat2, (lng1 < lng2 ? lng1 : lng2).toDouble()),
+        northeast: LatLng(lat1 > lat2 ? lat1 : lat2, (lng1 > lng2 ? lng1 : lng2).toDouble()),
       );
 
       _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));

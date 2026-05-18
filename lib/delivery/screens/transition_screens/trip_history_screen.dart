@@ -476,7 +476,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
     );
   }
 
-  Widget _buildTripListItem(Order order, int index) {
+  Widget _buildTripListItem(OrderData order, int index) {
     final theme = Theme.of(context);
     
     return FadeTransition(

@@ -52,7 +52,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(0.0, 1.0, curve: Curves.repeat(reverse: true)),
+        curve: Interval(0.0, 1.0, curve: Curves.elasticIn),
       ),
     );
 
@@ -119,7 +119,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
               showRoute: false,
               showCurrentLocation: true,
               showPickupMarker: true,
-              pickupLocation: widget.order.pickupLocation,
+              pickupLocation: widget.order.pickupPoint,
             ),
           ),
 

@@ -3,6 +3,7 @@ import '../../main/models/WalletListModel.dart';
 import '../../main/models/PaginationModel.dart';
 import 'CreateOrderDetailModel.dart';
 import 'VehicleModel.dart';
+import 'OrderItemModel.dart';
 
 class OrderListModel {
   PaginationModel? pagination;
@@ -156,6 +157,16 @@ class OrderData {
   String? reScheduleDateTime;
   RatingDetail? ratingDetail;
   
+  // Aliases for backward compatibility with old code
+  PickupPoint? get pickupLocation => pickupPoint;
+  PickupPoint? get dropoffLocation => deliveryPoint;
+  List<OrderItemModel>? get items => [];
+  num? get earnings => totalAmount;
+  String? get specialInstructions => pickupPoint?.instruction;
+  String? get deliveryInstructions => deliveryPoint?.instruction;
+  bool? get requiresSignature => false;
+  bool? get requiresPhoto => false;
+  
   // Computed properties for compatibility
   String? get fromLatitude => pickupPoint?.latitude;
   String? get fromLongitude => pickupPoint?.longitude;
@@ -165,7 +176,7 @@ class OrderData {
   String? get toAddress => deliveryPoint?.address;
   String? get customerName => clientName;
   num? get deliveryCharge => totalAmount;
-  var get distance => totalDistance;
+  num? get distance => totalDistance;
   String? get estimatedDeliveryTime => deliveryDatetime;
   num? get customerRating => ratingDetail?.rating;
   num? get deliveryManCommission => totalAmount; // Added for earnings summary

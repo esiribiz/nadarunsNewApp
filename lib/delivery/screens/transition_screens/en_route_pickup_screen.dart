@@ -95,7 +95,7 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
     if (order.latitude != null && order.longitude != null) {
       _markers.add(Marker(
         markerId: const MarkerId('driver'),
-        position: LatLng(order.latitude!, order.longitude!),
+        position: LatLng(double.parse(order.latitude!), double.parse(order.longitude!)),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
         infoWindow: const InfoWindow(title: 'Your Location'),
       ));
@@ -150,8 +150,8 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
       final lng2 = order.pickupPoint!.longitude != null ? double.parse(order.pickupPoint!.longitude!) : 0;
 
       final bounds = LatLngBounds(
-        southwest: LatLng(lat1 < lat2 ? lat1 : lat2, lng1 < lng2 ? lng1 : lng2),
-        northeast: LatLng(lat1 > lat2 ? lat1 : lat2, lng1 > lng2 ? lng1 : lng2),
+        southwest: LatLng(lat1 < lat2 ? lat1 : lat2, (lng1 < lng2 ? lng1 : lng2).toDouble()),
+        northeast: LatLng(lat1 > lat2 ? lat1 : lat2, (lng1 > lng2 ? lng1 : lng2).toDouble()),
       );
 
       _mapController!.animateCamera(
@@ -246,7 +246,7 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: order?.latitude != null
-                    ? LatLng(order!.latitude!, order.longitude ?? 0)
+                    ? LatLng(double.parse(order!.latitude!), double.parse(order.longitude ?? '0'))
                     : const LatLng(0, 0),
                 zoom: 13,
               ),
