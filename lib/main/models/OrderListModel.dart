@@ -155,6 +155,19 @@ class OrderData {
   int? isRescheduled;
   String? reScheduleDateTime;
   RatingDetail? ratingDetail;
+  
+  // Computed properties for compatibility
+  String? get fromLatitude => pickupPoint?.latitude;
+  String? get fromLongitude => pickupPoint?.longitude;
+  String? get toLatitude => deliveryPoint?.latitude;
+  String? get toLongitude => deliveryPoint?.longitude;
+  String? get fromAddress => pickupPoint?.address;
+  String? get toAddress => deliveryPoint?.address;
+  String? get customerName => clientName;
+  num? get deliveryCharge => totalAmount;
+  var get distance => totalDistance;
+  String? get estimatedDeliveryTime => deliveryDatetime;
+  num? get customerRating => ratingDetail?.rating;
 
   OrderData({
     this.orderTrackingId,
