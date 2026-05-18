@@ -15,7 +15,7 @@ import '../components/DriverDesignSystem.dart';
 /// - Contact buttons (customer/support)
 /// - Cancel trip option
 class EnRouteToPickupScreen extends StatefulWidget {
-  final OrderData? orderData;
+  final OrderData? order;
   final VoidCallback? onArrivedAtPickup;
   final VoidCallback? onCancelTrip;
   final Function()? onContactCustomer;
@@ -87,9 +87,9 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
   }
 
   void _loadNavigationData() {
-    if (widget.orderData == null) return;
+    if (widget.order == null) return;
 
-    final order = widget.orderData!;
+    final order = widget.order!;
 
     // Driver current location
     if (order.latitude != null && order.longitude != null) {
@@ -135,9 +135,9 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
   }
 
   void _centerMapOnRoute() {
-    if (widget.orderData == null || _mapController == null) return;
+    if (widget.order == null || _mapController == null) return;
 
-    final order = widget.orderData!;
+    final order = widget.order!;
     if (order.latitude != null && order.fromLatitude != null) {
       final lat1 = order.latitude!;
       final lat2 = order.fromLatitude!;
@@ -230,7 +230,7 @@ class _EnRouteToPickupScreenState extends State<EnRouteToPickupScreen>
 
   @override
   Widget build(BuildContext context) {
-    final order = widget.orderData;
+    final order = widget.order;
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
