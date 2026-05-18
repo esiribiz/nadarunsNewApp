@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
-import '../../../services/order_service.dart';
-import '../../../models/order.dart';
-import '../../../widgets/map_placeholder_widget.dart';
+import '../../../main/models/OrderListModel.dart';
+import '../../../main/network/RestApis.dart';
+import '../../../main/utils/Constants.dart';
+import '../../../main.dart';
+import '../components/DriverDesignSystem.dart';
+import 'earnings_summary_screen.dart';
 
 /// Screen 6: Arrived at Dropoff
 /// Driver has arrived at customer location and needs to confirm delivery
-class ArrivedAtDropoffScreen extends StatefulWidget {
-  final Order order;
+class ArrivedDropoffScreen extends StatefulWidget {
+  final OrderData order;
+  final Function()? onConfirmDelivery;
 
-  const ArrivedAtDropoffScreen({Key? key, required this.order}) : super(key: key);
+  const ArrivedDropoffScreen({
+    Key? key,
+    required this.order,
+    this.onConfirmDelivery,
+  }) : super(key: key);
 
   @override
-  State<ArrivedAtDropoffScreen> createState() => _ArrivedAtDropoffScreenState();
+  State<ArrivedDropoffScreen> createState() => _ArrivedDropoffScreenState();
 }
 
 class _ArrivedAtDropoffScreenState extends State<ArrivedAtDropoffScreen>
