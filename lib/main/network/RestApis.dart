@@ -402,6 +402,12 @@ Future updateOrder({String? pickupDatetime, String? deliveryDatetime, String? cl
   });
 }
 
+/// New API endpoint for accepting orders - uses assign-order-update endpoint
+Future<OrderStausResponse> acceptOrder({required int orderId, required String status}) async {
+  Map request = {'order_id': orderId, 'status': status};
+  return OrderStausResponse.fromJson(await handleResponse(await buildHttpResponse('assign-order-update', request: request, method: HttpMethod.POST)));
+}
+
 Future<PaymentGatewayListModel> getPaymentGatewayList() async {
   return PaymentGatewayListModel.fromJson(await handleResponse(await buildHttpResponse('paymentgateway-list?status=1', method: HttpMethod.GET)));
 }
