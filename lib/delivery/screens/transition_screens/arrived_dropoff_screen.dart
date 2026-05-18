@@ -25,7 +25,7 @@ class ArrivedDropoffScreen extends StatefulWidget {
   State<ArrivedDropoffScreen> createState() => _ArrivedDropoffScreenState();
 }
 
-class _ArrivedAtDropoffScreenState extends State<ArrivedAtDropoffScreen>
+class _ArrivedDropoffScreenState extends State<ArrivedDropoffScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;

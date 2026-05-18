@@ -109,7 +109,7 @@ class _NavigateToPickupScreenState extends State<NavigateToPickupScreen>
         ],
         color: DriverPalette.routeLineActive,
         width: 6,
-        patterns: const [PatternItem.dash(30), PatternItem.gap(15)],
+        patterns: [PatternItem.dash(30), PatternItem.gap(15)],
       ));
     }
 
