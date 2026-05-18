@@ -28,6 +28,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
   late Animation<double> _slideAnimation;
   late Animation<double> _pulseAnimation;
   bool _isConfirming = false;
+  bool get _isProcessing => _isConfirming;
   
   // Map controller
   GoogleMapController? _mapController;
@@ -293,7 +294,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      widget.order.pickupLocation.name,
+                                      widget.order.pickupLocation?.name ?? 'Pickup Location',
                                       style: theme.textTheme.bodyLarge?.copyWith(
                                         color: Colors.grey[600],
                                       ),
@@ -339,7 +340,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            widget.order.customerName,
+                                            widget.order.customerName ?? 'Customer',
                                             style: theme.textTheme.titleMedium?.copyWith(
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -420,13 +421,13 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
                                     _buildInfoItem(
                                       icon: Icons.shopping_bag_outlined,
                                       label: 'Items',
-                                      value: '${widget.order.items.length}',
+                                      value: '${widget.order.items?.length ?? 0}',
                                       color: Colors.purple,
                                     ),
                                     _buildInfoItem(
                                       icon: Icons.attach_money,
                                       label: 'Earnings',
-                                      value: '\$${widget.order.earnings.toStringAsFixed(2)}',
+                                      value: '\$${(widget.order.earnings ?? 0).toStringAsFixed(2)}',
                                       color: Colors.green,
                                     ),
                                     _buildInfoItem(
@@ -478,7 +479,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> with SingleTi
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          widget.order.specialInstructions!,
+                                          widget.order.specialInstructions ?? '',
                                           style: theme.textTheme.bodySmall?.copyWith(
                                             color: Colors.amber[800],
                                           ),

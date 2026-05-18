@@ -476,7 +476,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
     );
   }
 
-  Widget _buildTripListItem(OrderData order, int index) {
+  Widget _buildTripListItem(EarningData order, int index) {
     final theme = Theme.of(context);
     
     return FadeTransition(
@@ -542,7 +542,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
                       children: [
                         Expanded(
                           child: Text(
-                            order.pickupLocation.name,
+                            order.pickupLocation?.name ?? 'Pickup',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: Colors.grey[900],
@@ -558,7 +558,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            order.dropoffLocation.name,
+                            order.dropoffLocation?.name ?? 'Dropoff',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: Colors.grey[900],
@@ -578,7 +578,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '~${(order.distanceKm * 2.5).round()} min',
+                          '~${((order.totalDistance ?? 0) * 2.5).round()} min',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.grey[500],
                           ),
@@ -591,7 +591,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${order.distanceKm.toStringAsFixed(1)} km',
+                          '${(order.totalDistance ?? 0).toStringAsFixed(1)} km',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.grey[500],
                           ),
@@ -607,7 +607,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '\$${order.earnings.toStringAsFixed(2)}',
+                    '\$${(order.totalAmount ?? 0).toStringAsFixed(2)}',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.green[700],

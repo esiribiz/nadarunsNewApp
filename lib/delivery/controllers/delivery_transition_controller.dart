@@ -7,7 +7,7 @@ import 'package:nadaruns_delivery/extensions/shared_pref.dart';
 import 'package:nadaruns_delivery/main.dart';
 import 'package:nadaruns_delivery/delivery/screens/transition_screens/accept_order_screen.dart';
 import 'package:nadaruns_delivery/delivery/screens/transition_screens/navigate_to_pickup_screen.dart';
-import 'package:nadaruns_delivery/delivery/screens/transition_screens/en_route_to_pickup_screen.dart';
+import 'package:nadaruns_delivery/delivery/screens/transition_screens/en_route_pickup_screen.dart';
 import 'package:nadaruns_delivery/delivery/screens/transition_screens/confirm_pickup_screen.dart';
 import 'package:nadaruns_delivery/delivery/screens/transition_screens/en_route_dropoff_screen.dart';
 import 'package:nadaruns_delivery/delivery/screens/transition_screens/arrived_dropoff_screen.dart';
@@ -138,7 +138,7 @@ class DeliveryTransitionController {
     final result = await Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => EnRouteToPickupScreen(
+        pageBuilder: (context, animation, secondaryAnimation) => EnRoutePickupScreen(
           order: order,
           onArrivedAtPickup: () => _showArrivedAtPickupUI(order),
         ),
@@ -228,6 +228,7 @@ class DeliveryTransitionController {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => EnRouteDropoffScreen(
           order: order,
+          onArrivedAtDropoff: () => _showArrivedAtDropoffUI(order),
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(

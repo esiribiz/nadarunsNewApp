@@ -115,7 +115,7 @@ class OrderData {
   String? cityName;
   String? parcelType;
   num? totalWeight;
-  var totalDistance;
+  num? totalDistance;
   String? pickupDatetime;
   int? bid_type; // Added for bid type
   String? deliveryDatetime;
@@ -166,6 +166,7 @@ class OrderData {
   String? get deliveryInstructions => deliveryPoint?.instruction;
   bool? get requiresSignature => false;
   bool? get requiresPhoto => false;
+  num? get distanceKm => totalDistance is num ? totalDistance : (totalDistance != null ? double.tryParse(totalDistance.toString()) : null);
   
   // Computed properties for compatibility
   String? get fromLatitude => pickupPoint?.latitude;

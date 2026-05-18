@@ -475,7 +475,7 @@ class _EnRouteDropoffScreenState extends State<EnRouteDropoffScreen>
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      widget.order.dropoffLocation.name,
+                                      widget.order.dropoffLocation?.name ?? 'Dropoff Location',
                                       style: theme.textTheme.bodyLarge?.copyWith(
                                         color: Colors.grey[600],
                                       ),

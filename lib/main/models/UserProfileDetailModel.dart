@@ -1,5 +1,6 @@
 import '../models/PaginationModel.dart';
 import 'LoginResponse.dart';
+import 'OrderListModel.dart';
 
 class UserProfileDetailModel {
   UserData? data;
@@ -259,6 +260,11 @@ class EarningData {
   num? deliveryManFee;
   num? deliveryManTip;
   num? deliveryManCommission;
+  
+  // Added fields for trip history display compatibility
+  PickupPoint? pickupLocation;
+  PickupPoint? dropoffLocation;
+  num? distanceKm;
 
   EarningData(
       {this.id,
@@ -280,7 +286,10 @@ class EarningData {
       this.receivedBy,
       this.deliveryManFee,
       this.deliveryManTip,
-      this.deliveryManCommission});
+      this.deliveryManCommission,
+      this.pickupLocation,
+      this.dropoffLocation,
+      this.distanceKm});
 
   EarningData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
