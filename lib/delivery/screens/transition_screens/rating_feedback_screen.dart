@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../services/order_service.dart';
-import '../../../models/order.dart';
+import '../../../main/models/OrderListModel.dart';
+import '../../../main/network/RestApis.dart';
+import '../../../main.dart';
 
 /// Screen 8: Rating & Feedback
 /// Allows driver to rate customer and provide feedback after delivery
+/// Uses existing OrderData model and backend logic
 class RatingFeedbackScreen extends StatefulWidget {
-  final Order order;
+  final OrderData order;
+  final Function(double, String) onSubmitRating;
 
-  const RatingFeedbackScreen({Key? key, required this.order}) : super(key: key);
+  const RatingFeedbackScreen({
+    Key? key, 
+    required this.order,
+    required this.onSubmitRating,
+  }) : super(key: key);
 
   @override
   State<RatingFeedbackScreen> createState() => _RatingFeedbackScreenState();
@@ -97,36 +103,15 @@ class _RatingFeedbackScreenState extends State<RatingFeedbackScreen>
         }
       }
 
-      // Submit rating and feedback
-      final orderService = Provider.of<OrderService>(context, listen: false);
-      await orderService.submitDriverRating(
-        orderId: widget.order.id,
-        customerRating: _selectedRating,
-        feedbackTags: selectedTags,
-        customFeedback: _customFeedbackController.text.trim(),
+      // Use callback to submit rating through controller
+      // This preserves existing backend logic
+      widget.onSubmitRating(
+        _selectedRating.toDouble(),
+        _customFeedbackController.text.trim(),
       );
 
       if (mounted) {
-        // Navigate to trip history or home screen
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                _buildNextScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.0, 1.0),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutCubic,
-                )),
-                child: child,
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
+        // Navigation handled by callback
       }
     } catch (e) {
       if (mounted) {

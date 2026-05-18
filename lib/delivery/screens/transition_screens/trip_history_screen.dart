@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../../models/order.dart';
+import 'dart:async';
+import '../../../main/models/OrderListModel.dart';
+import '../../../main/models/UserProfileDetailModel.dart';
+import '../../../main/network/RestApis.dart';
+import '../../../main.dart';
+import '../../../extensions/text_styles.dart';
+import '../../../extensions/extension_util/int_extensions.dart';
+import '../../../extensions/extension_util/string_extensions.dart';
+import '../../components/DriverDesignSystem.dart';
 
 /// Screen 9: Trip History
 /// Shows driver their recent delivery history and statistics
+/// Uses existing EarningData model and backend logic
 class TripHistoryScreen extends StatefulWidget {
-  final List<Order> recentOrders;
-
-  const TripHistoryScreen({Key? key, required this.recentOrders}) : super(key: key);
+  const TripHistoryScreen({Key? key}) : super(key: key);
 
   @override
   State<TripHistoryScreen> createState() => _TripHistoryScreenState();
@@ -19,6 +26,13 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
   late Animation<double> _slideAnimation;
   String _selectedFilter = 'Today';
   final List<String> _filters = ['Today', 'This Week', 'This Month', 'All Time'];
+  
+  ScrollController _scrollController = ScrollController();
+  List<EarningData> _earningList = [];
+  EarningDetail _earningDetail = EarningDetail();
+  int _currentPage = 1;
+  int _totalPage = 1;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -44,164 +58,243 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
     );
 
     _animationController.forward();
+    _init();
+  }
+
+  void _init() async {
+    await _getUserDetailApiCall();
+    await _getPaymentListApi();
+    
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        if (_currentPage < _totalPage && !_isLoading) {
+          _currentPage++;
+          _getPaymentListApi();
+        }
+      }
+    });
+  }
+
+  Future<void> _getUserDetailApiCall() async {
+    setState(() => _isLoading = true);
+    try {
+      final profile = await getUserProfile();
+      setState(() {
+        _earningDetail = profile.earningDetail ?? EarningDetail();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      debugPrint('Error loading user profile: $e');
+    }
+  }
+
+  Future<void> _getPaymentListApi() async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await getPaymentList(page: _currentPage);
+      setState(() {
+        _currentPage = result.pagination?.currentPage ?? 1;
+        _totalPage = result.pagination?.totalPages ?? 1;
+        
+        if (_currentPage == 1) {
+          _earningList.clear();
+        }
+        
+        final List<EarningData> fetched = result.data ?? [];
+        for (final item in fetched) {
+          // Skip items with null or zero orderId
+          if (item.orderId == null || item.orderId == 0) {
+            continue;
+          }
+          // Skip items with null or zero deliveryManCommission
+          if (item.deliveryManCommission == null || item.deliveryManCommission == 0) {
+            continue;
+          }
+          // Check for duplicates based on orderId
+          final bool alreadyAdded = _earningList.any(
+            (existing) => existing.orderId == item.orderId,
+          );
+          if (!alreadyAdded) {
+            _earningList.add(item);
+          }
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      debugPrint('Error loading payment list: $e');
+    }
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) super.setState(fn);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final screenSize = MediaQuery.of(context).size;
-
-    // Calculate statistics
-    final totalTrips = widget.recentOrders.length;
-    final totalEarnings = widget.recentOrders.fold<double>(
+    
+    // Calculate statistics from existing EarningData model
+    final totalTrips = _earningDetail.totalOrder ?? 0;
+    final totalEarnings = _earningDetail.deliveryManCommission ?? 0.0;
+    final totalDistance = _earningList.fold<double>(
       0.0,
-      (sum, order) => sum + order.earnings,
+      (sum, item) => sum + (item.totalAmount ?? 0),
     );
-    final totalDistance = widget.recentOrders.fold<double>(
-      0.0,
-      (sum, order) => sum + order.distanceKm,
-    );
-    final avgRating = widget.recentOrders.isNotEmpty
-        ? widget.recentOrders.fold<double>(
-            0.0,
-            (sum, order) => sum + (order.customerRating ?? 0.0),
-          ) / widget.recentOrders.length
-        : 0.0;
+    final paidOrders = _earningDetail.paidOrder ?? 0;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // App Bar
-            SliverAppBar(
-              floating: true,
-              backgroundColor: Colors.grey[50],
-              elevation: 0,
-              title: Text(
-                'Trip History',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[900],
-                ),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    // Show export/share options
-                  },
-                  icon: Icon(
-                    Icons.share_outlined,
-                    color: Colors.grey[600],
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFF7FAFF), Colors.white],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                 ),
-              ],
+              ),
             ),
+            CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // App Bar
+                SliverAppBar(
+                  floating: true,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  title: Text(
+                    'Trip History',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[900],
+                    ),
+                  ),
+                  actions: [
+                    IconButton(
+                      onPressed: () {
+                        // Show export/share options
+                      },
+                      icon: Icon(
+                        Icons.share_outlined,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
 
-            // Statistics Cards
-            SliverToBoxAdapter(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.3),
-                    end: Offset.zero,
-                  ).animate(_slideAnimation),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Summary header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Statistics Cards
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.3),
+                        end: Offset.zero,
+                      ).animate(_slideAnimation),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Your Performance',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[800],
-                              ),
+                            // Summary header
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Your Performance',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green[50],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.trending_up,
+                                        size: 16,
+                                        color: Colors.green[700],
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '+${((paidOrders / (totalTrips.clamp(1, totalTrips))) * 100 - 50).round()}%',
+                                        style: theme.textTheme.labelLarge?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green[700],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green[50],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.trending_up,
-                                    size: 16,
-                                    color: Colors.green[700],
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '+12%',
-                                    style: theme.textTheme.labelLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green[700],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(height: 16),
+
+                            // Stats grid
+                            GridView.count(
+                              crossAxisCount: 2,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 1.5,
+                              children: [
+                                _buildStatCard(
+                                  icon: Icons.route,
+                                  label: 'Total Trips',
+                                  value: totalTrips.toString(),
+                                  color: Colors.blue,
+                                ),
+                                _buildStatCard(
+                                  icon: Icons.attach_money,
+                                  label: 'Total Earnings',
+                                  value: '\$${totalEarnings.toStringAsFixed(0)}',
+                                  color: Colors.green,
+                                ),
+                                _buildStatCard(
+                                  icon: Icons.wallet,
+                                  label: 'Wallet Balance',
+                                  value: '\$${(_earningDetail.walletBalance ?? 0).toStringAsFixed(0)}',
+                                  color: Colors.purple,
+                                ),
+                                _buildStatCard(
+                                  icon: Icons.check_circle,
+                                  label: 'Paid Orders',
+                                  value: paidOrders.toString(),
+                                  color: Colors.amber,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-
-                        // Stats grid
-                        GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 1.5,
-                          children: [
-                            _buildStatCard(
-                              icon: Icons.route,
-                              label: 'Total Trips',
-                              value: totalTrips.toString(),
-                              color: Colors.blue,
-                            ),
-                            _buildStatCard(
-                              icon: Icons.attach_money,
-                              label: 'Total Earnings',
-                              value: '\$${totalEarnings.toStringAsFixed(0)}',
-                              color: Colors.green,
-                            ),
-                            _buildStatCard(
-                              icon: Icons.straighten,
-                              label: 'Distance',
-                              value: '${totalDistance.toStringAsFixed(0)} km',
-                              color: Colors.purple,
-                            ),
-                            _buildStatCard(
-                              icon: Icons.star,
-                              label: 'Avg Rating',
-                              value: avgRating > 0 ? avgRating.toStringAsFixed(1) : '--',
-                              color: Colors.amber,
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
 
             // Filter chips
             SliverToBoxAdapter(
@@ -250,40 +343,77 @@ class _TripHistoryScreenState extends State<TripHistoryScreen>
               padding: const EdgeInsets.symmetric(horizontal: 24),
               sliver: FadeTransition(
                 opacity: _fadeAnimation,
-                child: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index >= widget.recentOrders.length) {
-                        return null;
-                      }
-                      final order = widget.recentOrders[index];
-                      return _buildTripListItem(order, index);
-                    },
-                    childCount: widget.recentOrders.length,
-                  ),
-                ),
+                child: _isLoading && _earningList.isEmpty
+                    ? SliverToBoxAdapter(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(40),
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                      )
+                    : _earningList.isEmpty
+                        ? SliverToBoxAdapter(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(40),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.receipt_long_outlined,
+                                      size: 64,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'No trips yet',
+                                      style: theme.textTheme.titleLarge?.copyWith(
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Complete your first delivery to see history',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: Colors.grey[500],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                if (index >= _earningList.length) {
+                                  return null;
+                                }
+                                final earning = _earningList[index];
+                                return _buildTripListItem(earning, index);
+                              },
+                              childCount: _earningList.length,
+                            ),
+                          ),
               ),
             ),
+
+            // Loading indicator at bottom
+            if (_isLoading && _earningList.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              ),
 
             // Bottom padding
             const SliverToBoxAdapter(
               child: SizedBox(height: 100),
             ),
           ],
-        ),
-      ),
-
-      // Floating action button - Go Online/Offline
-      floatingActionButton: FadeTransition(
-        opacity: _fadeAnimation,
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            // Toggle online/offline status
-          },
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          icon: const Icon(Icons.power),
-          label: const Text('Go Offline'),
         ),
       ),
     );

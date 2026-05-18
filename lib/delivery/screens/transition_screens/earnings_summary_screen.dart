@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../../models/order.dart';
+import '../../../main/models/OrderListModel.dart';
+import '../../../main/models/UserProfileDetailModel.dart';
+import '../../../main/network/RestApis.dart';
+import '../../../main.dart';
+import '../../../extensions/text_styles.dart';
+import '../../../extensions/extension_util/int_extensions.dart';
+import '../../../extensions/shared_pref.dart';
 
 /// Screen 7: Earnings Summary
 /// Shows driver their earnings for the completed delivery with breakdown
+/// Uses existing OrderData model, EarningData model and backend logic
 class EarningsSummaryScreen extends StatefulWidget {
-  final Order order;
+  final OrderData order;
+  final VoidCallback onComplete;
 
-  const EarningsSummaryScreen({Key? key, required this.order}) : super(key: key);
+  const EarningsSummaryScreen({
+    Key? key, 
+    required this.order,
+    required this.onComplete,
+  }) : super(key: key);
 
   @override
   State<EarningsSummaryScreen> createState() => _EarningsSummaryScreenState();
@@ -20,6 +32,8 @@ class _EarningsSummaryScreenState extends State<EarningsSummaryScreen>
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
   bool _isExpanded = false;
+  bool _isLoading = false;
+  EarningDetail? _earningDetail;
 
   @override
   void initState() {
@@ -52,12 +66,83 @@ class _EarningsSummaryScreenState extends State<EarningsSummaryScreen>
     );
 
     _animationController.forward();
+    _loadEarningDetails();
+  }
+
+  Future<void> _loadEarningDetails() async {
+    setState(() => _isLoading = true);
+    try {
+      final profile = await getUserProfile();
+      setState(() {
+        _earningDetail = profile.earningDetail;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      debugPrint('Error loading earning details: $e');
+    }
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  // Helper methods to use existing OrderData model fields
+  String _getEarningsAmount() {
+    // Use existing deliveryManCommission from OrderData or calculate from total
+    final amount = widget.order.deliveryManCommission ?? widget.order.totalAmount ?? 0;
+    return '\$${amount.toStringAsFixed(2)}';
+  }
+
+  String _getBaseFare() {
+    final amount = widget.order.deliveryManCommission ?? widget.order.totalAmount ?? 0;
+    return '\$${(amount * 0.6).toStringAsFixed(2)}';
+  }
+
+  String _getDistanceBonus() {
+    final amount = widget.order.deliveryManCommission ?? widget.order.totalAmount ?? 0;
+    return '\$${(amount * 0.25).toStringAsFixed(2)}';
+  }
+
+  String _getTimeBonus() {
+    final amount = widget.order.deliveryManCommission ?? widget.order.totalAmount ?? 0;
+    return '\$${(amount * 0.1).toStringAsFixed(2)}';
+  }
+
+  String _getServiceFee() {
+    final amount = widget.order.deliveryManCommission ?? widget.order.totalAmount ?? 0;
+    return '\$${(amount * 0.05).toStringAsFixed(2)}';
+  }
+
+  String _getOrderId() {
+    return widget.order.orderTrackingId ?? widget.order.id?.toString() ?? 'N/A';
+  }
+
+  String _getDistance() {
+    final distance = widget.order.totalDistance ?? 0;
+    return '${distance.toStringAsFixed(1)} km';
+  }
+
+  String _getPickupLocation() {
+    return widget.order.pickupPoint?.address ?? 'Unknown';
+  }
+
+  String _getDropoffLocation() {
+    return widget.order.deliveryPoint?.address ?? 'Unknown';
+  }
+
+  String _getDuration() {
+    // Estimate duration based on distance (assuming average speed)
+    final distance = widget.order.totalDistance ?? 0;
+    return '~${(distance * 2.5).round()} min';
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year} at ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -194,7 +279,7 @@ class _EarningsSummaryScreenState extends State<EarningsSummaryScreen>
                             ),
                           ),
                           Text(
-                            widget.order.earnings.toStringAsFixed(2),
+                            _getEarningsAmount(),
                             style: theme.textTheme.displayLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.green[600],
@@ -286,28 +371,28 @@ class _EarningsSummaryScreenState extends State<EarningsSummaryScreen>
                     _buildBreakdownCard(
                       icon: Icons.attach_money,
                       title: 'Base Fare',
-                      value: '\$${(widget.order.earnings * 0.6).toStringAsFixed(2)}',
+                      value: '_getBaseFare()',
                       color: Colors.blue,
                     ),
                     const SizedBox(height: 12),
                     _buildBreakdownCard(
                       icon: Icons.route,
                       title: 'Distance Bonus',
-                      value: '\$${(widget.order.earnings * 0.25).toStringAsFixed(2)}',
+                      value: '_getDistanceBonus()',
                       color: Colors.purple,
                     ),
                     const SizedBox(height: 12),
                     _buildBreakdownCard(
                       icon: Icons.timer,
                       title: 'Time Bonus',
-                      value: '\$${(widget.order.earnings * 0.1).toStringAsFixed(2)}',
+                      value: '_getTimeBonus()',
                       color: Colors.orange,
                     ),
                     const SizedBox(height: 12),
                     _buildBreakdownCard(
                       icon: Icons.star,
                       title: 'Service Fee',
-                      value: '\$${(widget.order.earnings * 0.05).toStringAsFixed(2)}',
+                      value: '_getServiceFee()',
                       color: Colors.green,
                       isLast: true,
                     ),
@@ -324,11 +409,11 @@ class _EarningsSummaryScreenState extends State<EarningsSummaryScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _buildDetailRow('Order ID', '#${widget.order.id.substring(0, 12)}'),
-                      _buildDetailRow('Distance', '${widget.order.distanceKm.toStringAsFixed(1)} km'),
-                      _buildDetailRow('Duration', '~${(widget.order.distanceKm * 2.5).round()} min'),
-                      _buildDetailRow('Pickup', widget.order.pickupLocation.name),
-                      _buildDetailRow('Dropoff', widget.order.dropoffLocation.name),
+                      _buildDetailRow('Order ID', '#${_getOrderId()}'),
+                      _buildDetailRow('Distance', '${_getDistance()}'),
+                      _buildDetailRow('Duration', '${_getDuration()}'),
+                      _buildDetailRow('Pickup', _getPickupLocation()),
+                      _buildDetailRow('Dropoff', _getDropoffLocation()),
                       _buildDetailRow('Completed', _formatDateTime(DateTime.now())),
                     ],
                   ],
@@ -500,8 +585,9 @@ class _EarningsSummaryScreenState extends State<EarningsSummaryScreen>
   }
 
   Widget _buildNextScreen() {
-    // Will be replaced with RatingFeedbackScreen
-    return Container();
+    // Navigate to rating/feedback screen using callback
+    widget.onComplete();
+    return Container(); // Placeholder, navigation handled by callback
   }
 }
 
